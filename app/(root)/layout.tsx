@@ -13,13 +13,8 @@ const Layout = async ({ children }: { children: ReactNode }) => {
     <div className="root-layout">
       <nav className="flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="YourHiredAI Logo"
-            width={40}
-            height={40}
-          />
-          <h2 className="text-primary-100">YourHiredAI</h2>
+          <Image src="/logo.png" alt="GetHiredAI Logo" width={40} height={40} />
+          <h2 className="text-primary-100">GetHiredAI</h2>
         </Link>
 
         {/* Optional: Add navigation links or user menu here */}
