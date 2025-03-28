@@ -11,14 +11,53 @@ const Layout = async ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="root-layout">
-      <nav>
+      <nav className="flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="MockMate Logo" width={38} height={32} />
-          <h2 className="text-primary-100">PrepWise</h2>
+          <Image
+            src="/logo.png"
+            alt="YourHiredAI Logo"
+            width={40}
+            height={40}
+          />
+          <h2 className="text-primary-100">YourHiredAI</h2>
         </Link>
+
+        {/* Optional: Add navigation links or user menu here */}
       </nav>
 
-      {children}
+      <main className="flex-1">{children}</main>
+
+      <footer className="mt-auto py-8 border-t border-input">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link
+              href="https://beroniinnovations.com"
+              target="_blank"
+              className="hover:opacity-80 transition-opacity"
+            >
+              <div className="relative h-8 w-8">
+                {" "}
+                {/* 1:1 container */}
+                <Image
+                  src="/B.png"
+                  alt="Beroni Innovations Logo"
+                  fill
+                  className="object-contain" // Maintains aspect ratio
+                  priority
+                />
+              </div>
+            </Link>
+            <span className="text-light-400 text-sm">
+              Built by{" "}
+              <span className="text-light-400 text-sm">Beroni Innovations</span>
+            </span>
+          </div>
+
+          <div className="text-light-400 text-sm">
+            <p>Inspired by JS Mastery tutorial</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
