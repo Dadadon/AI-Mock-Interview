@@ -1,6 +1,6 @@
 "use server";
 
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { google } from "@ai-sdk/google";
 
 import { db } from "@/firebase/admin";
@@ -152,3 +152,124 @@ export async function createGigProject(params: GigProject) {
   }
 }
 // Add corresponding fetch functions: getJobPostings(), getGigProjects(), etc.
+/**
+ * Fetches all active job postings for the marketplace.
+ */
+export async function getJobPostings(): Promise<JobPosting[] | null> {
+  try {
+    const postings = await db.collection("jobPostings").orderBy("createdAt", "desc").get();
+    
+    if (postings.empty) return null;
+
+    return postings.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as JobPosting[];
+  } catch (error) {
+    console.error("Error fetching job postings:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetches all active gig projects for the marketplace.
+ */
+export async function getGigProjects(): Promise<GigProject[] | null> {
+  try {
+    const gigs = await db.collection("gigProjects").orderBy("createdAt", "desc").get();
+    
+    if (gigs.empty) return null;
+
+    return gigs.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as GigProject[];
+  } catch (error) {
+    console.error("Error fetching gig projects:", error);
+    return null;
+  }
+}
+
+/**
+ * Fetches a single job posting by ID.
+ */
+export async function getJobPostingById(id: string): Promise<JobPosting | null> {
+  const job = await db.collection("jobPostings").doc(id).get();
+  return job.data() as JobPosting | null;
+}
+
+/**
+ * Fetches all applications submitted to a specific company.
+ */
+export async function getApplicationsForBusiness(companyId: string): Promise<Application[] | null> {
+  try {
+    const applications = await db
+      .collection("applications")
+      .where("companyId", "==", companyId)
+      .orderBy("submittedAt", "desc")
+      .get();
+      
+    if (applications.empty) return null;
+
+    return applications.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Application[];
+  } catch (error) {
+    console.error("Error fetching applications for business:", error);
+    return null;
+  }
+}
+
+
+// --- NEW EXIT INTERVIEW ACTION ---
+
+interface CreateExitInterviewSummaryParams {
+    userId: string;
+    transcript: { role: string; content: string }[];
+    companyId: string;
+    jobTitle: string; 
+}
+
+/**
+ * Conducts AI analysis on a full exit interview transcript and saves the summary.
+ */
+export async function createExitInterviewSummary(params: CreateExitInterviewSummaryParams) {
+  const { userId, transcript, companyId, jobTitle } = params;
+
+  try {
+    const formattedTranscript = transcript
+      .map((sentence: { role: string; content: string }) => `- ${sentence.role}: ${sentence.content}\n`)
+      .join("");
+
+    const { text: aiSummary } = await generateText({
+      model: google("gemini-2.0-flash-001"),
+      prompt: `Analyze the following exit interview transcript and provide a neutral, concise summary, structured as follows:
+        **Main Reason for Leaving:** (1-2 sentences)
+        **Key Feedback on Management/Culture:** (1-2 sentences)
+        **Top Suggestion for Improvement:** (1 sentence)
+        **Overall Tone:** (e.g., Positive, Neutral, Hostile)
+        
+        Transcript:
+        ${formattedTranscript}
+        
+        Return the summary as a single, formatted markdown string ready for display.`,
+    });
+
+    const exitInterview = {
+      companyId: companyId,
+      userId: userId,
+      jobTitle: jobTitle,
+      dateConducted: new Date().toISOString(),
+      transcript: transcript,
+      aiSummary: aiSummary,
+    };
+
+    const docRef = await db.collection("exitInterviews").add(exitInterview);
+
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error creating exit interview summary:", error);
+    return { success: false };
+  }
+}
