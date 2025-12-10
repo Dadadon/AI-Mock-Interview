@@ -22,7 +22,26 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           <h2 className="text-primary-100">GetHiredAI</h2>
         </Link>
 
-        {/* Optional: Add navigation links or user menu here */}
+        {/* NEW: Conditional Navigation */}
+        <div className="flex gap-4">
+            {isCandidate && (
+                <>
+                    <Link href="/jobs" className="text-light-100 hover:text-primary-200">Jobs</Link>
+                    <Link href="/gigs" className="text-light-100 hover:text-primary-200">Gigs</Link>
+                    <Link href="/interview" className="text-light-100 hover:text-primary-200">Practice</Link>
+                </>
+            )}
+            {isBusiness && (
+                <>
+                    <Link href="/business/post" className="text-light-100 hover:text-primary-200">Post</Link>
+                    <Link href="/business/applications" className="text-light-100 hover:text-primary-200">Applications</Link>
+                    <Link href="/business/analytics" className="text-light-100 hover:text-primary-200">Analytics</Link>
+                    <Link href="/business/exit-start" className="text-light-100 hover:text-primary-200">Exit Interview</Link>
+                </>
+            )}
+            {/* Live Chat for all users who are logged in */}
+            <Link href="/messages" className="text-light-100 hover:text-primary-200">Chat</Link>
+        </div>
       </nav>
 
       <main className="flex-1">{children}</main>
