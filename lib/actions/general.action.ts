@@ -273,3 +273,41 @@ export async function createExitInterviewSummary(params: CreateExitInterviewSumm
     return { success: false };
   }
 }
+
+// lib/actions/general.action.ts (ADDITIONS)
+
+export async function getAnalyticsData(companyId: string) {
+    // NOTE: In production, filter feedback by companyId/jobId.
+    // For this guide, we fetch ALL feedback and focus on aggregation logic.
+    const feedbackSnapshot = await db.collection("feedback").get(); 
+    const allFeedback = feedbackSnapshot.docs.map(doc => doc.data()) as Feedback[];
+
+    const totalInterviews = allFeedback.length;
+    const totalScoreSum = allFeedback.reduce((sum, f) => sum + f.totalScore, 0);
+    const averageScore = totalInterviews > 0 ? totalScoreSum / totalInterviews : 0;
+    
+    // Skill Gap Analysis (Counting for local intelligence)
+    const improvementFrequency = new Map<string, number>();
+
+    allFeedback.forEach(f => {
+        // Aggregate all areas for improvement across all feedback
+        f.areasForImprovement.forEach(area => {
+            const normalizedArea = area.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+            improvementFrequency.set(normalizedArea, (improvementFrequency.get(normalizedArea) || 0) + 1);
+        });
+    });
+    
+    // Get top 5 skill gaps
+    const topSkillGaps = Array.from(improvementFrequency.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([area, count]) => ({ area, count }));
+
+
+    return {
+        averageScore: Math.round(averageScore),
+        totalInterviews,
+        topSkillGaps,
+        // Add other metrics like Application Counts from 'applications' collection
+    };
+}
