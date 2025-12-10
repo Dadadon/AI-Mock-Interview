@@ -123,3 +123,32 @@ export async function getInterviewsByUserId(
     ...doc.data(),
   })) as Interview[];
 }
+
+// lib/actions/general.action.ts (ADDITIONS)
+
+// CRUD for Job Postings (C is shown)
+export async function createJobPosting(params: JobPosting) {
+  // In a real app, verify user role is 'business' before proceeding
+  try {
+    const jobPosting = { ...params, createdAt: new Date().toISOString() };
+    const docRef = await db.collection("jobPostings").add(jobPosting);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error creating job posting:", error);
+    return { success: false };
+  }
+}
+
+// CRUD for Gig Projects (C is shown)
+export async function createGigProject(params: GigProject) {
+  // In a real app, verify user role is 'business' before proceeding
+  try {
+    const gigProject = { ...params, createdAt: new Date().toISOString() };
+    const docRef = await db.collection("gigProjects").add(gigProject);
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Error creating gig project:", error);
+    return { success: false };
+  }
+}
+// Add corresponding fetch functions: getJobPostings(), getGigProjects(), etc.
