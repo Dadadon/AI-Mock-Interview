@@ -311,3 +311,21 @@ export async function getAnalyticsData(companyId: string) {
         // Add other metrics like Application Counts from 'applications' collection
     };
 }
+
+// Add this to lib/actions/general.action.ts
+
+export async function submitApplication(params: { jobId: string; userId: string; companyId: string }) {
+  try {
+    const application = {
+      ...params,
+      status: "pending",
+      submittedAt: new Date().toISOString(),
+    };
+    
+    const docRef = await db.collection("applications").add(application);
+    return { success: true, applicationId: docRef.id };
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    return { success: false };
+  }
+}
