@@ -110,6 +110,7 @@ interface User {
   skills?: string[]; // Automated Skill Tags
   averageRating?: number; // Gig Reputation
   companyId?: string; // Link to the company if role is 'business'
+  resumeUrl?: string;
 }
 
 interface Company {
