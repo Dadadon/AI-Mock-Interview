@@ -17,10 +17,7 @@ export default async function JobsPage() {
           >
             <h2 className="text-xl font-bold text-primary-200">{job.title}</h2>
             <p className="text-light-400 mt-2">{job.location}</p>
-            <button className="blue-gradient-dark py-2 px-4 rounded-lg mt-4 w-full">
-              Apply Now
-            </button>
-            // Inside your jobs.map()
+            
             <Link
               href={`/interview?role=${encodeURIComponent(
                 job.title
