@@ -18,7 +18,7 @@ export default async function JobsPage() {
             <h2 className="text-xl font-bold text-primary-200">{job.title}</h2>
             <p className="text-light-400 mt-2">{job.location}</p>
             
-            <Link
+            {/* <Link
               href={`/interview?role=${encodeURIComponent(
                 job.title
               )}&tech=${encodeURIComponent(job.techstack.join(","))}&jobId=${
@@ -27,7 +27,13 @@ export default async function JobsPage() {
               className="block text-center blue-gradient-dark py-2 px-4 rounded-lg mt-4 w-full"
             >
               Apply with AI Interview
-            </Link>
+            </Link> */}
+            <Link
+  href={`/apply/${job.id}?role=${encodeURIComponent(job.title)}&tech=${encodeURIComponent(job.techstack.join(","))}`}
+  className="block text-center blue-gradient-dark py-2 px-4 rounded-lg mt-4 w-full"
+>
+  Apply with AI Interview
+</Link>
           </div>
         ))}
         {!jobs && <p className="text-light-500">No jobs posted yet.</p>}

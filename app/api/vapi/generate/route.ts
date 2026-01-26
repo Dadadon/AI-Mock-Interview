@@ -48,7 +48,7 @@ import { getRandomInterviewCover } from "@/lib/utils";
 // app/api/vapi/generate/route.ts
 
 
-export async function POST(request: Request) {
+/* export async function POST(request: Request) {
   const { role, level, techstack, amount, userid, resumeText, jobId } = await request.json();
 
   try {
@@ -104,6 +104,66 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error generating unique interview:", error);
     return Response.json({ success: false, error: "Failed to generate interview" }, { status: 500 });
+  }
+} */
+
+
+export async function POST(request: Request) {
+  // Update destructuring to accept resumeUrl and jobId
+  const { type, role, level, techstack, amount, userid, resumeUrl, jobId } = await request.json();
+
+  try {
+    const { text: questions } = await generateText({
+      model: google("gemini-1.5-flash"), // Use a model that supports multimodal file inputs
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional recruiter for a Jamaican business specializing in initial candidate screening."
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Prepare ${amount} unique interview questions for the role of ${role} (${level}). 
+              Tech stack: ${techstack}. 
+              The focus should be: ${type}.
+              
+              IMPORTANT: Use the attached resume to personalize at least two questions to the candidate's specific work history or local experience (e.g., at companies like Digicel or NCB). 
+              The questions will be read by a voice assistant, so do not use special characters like "/" or "*" which might break the voice assistant.
+              Return the questions as a JSON array of strings: ["Question 1", "Question 2"]`
+            },
+            {
+              type: "file",
+              data: resumeUrl, // Pass the URL directly so the AI can read the file
+              mimeType: "application/pdf"
+            }
+          ]
+        }
+      ]
+    });
+
+    const interview = {
+      role: role,
+      type: type,
+      level: level,
+      techstack: techstack.split(","),
+      questions: JSON.parse(questions),
+      userId: userid,
+      jobId: jobId || null, // Optional: link to a specific job posting
+      resumeUrl: resumeUrl, // Store the reference to the resume used
+      finalized: false, // Set to false to indicate an active screening session
+      isScreening: !!jobId, // Flag to identify this as a job application screening
+      coverImage: getRandomInterviewCover(),
+      createdAt: new Date().toISOString(),
+    };
+
+    const docRef = await db.collection("interviews").add(interview);
+
+    return Response.json({ success: true, interviewId: docRef.id }, { status: 200 });
+  } catch (error) {
+    console.error("Error generating multimodal interview:", error);
+    return Response.json({ success: false, error: error }, { status: 500 });
   }
 }
 

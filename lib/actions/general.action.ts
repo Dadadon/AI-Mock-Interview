@@ -5,7 +5,7 @@ import { google } from "@ai-sdk/google";
 
 import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
-import pdf from 'pdf-parse';
+
 
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId } = params;
@@ -331,14 +331,7 @@ export async function submitApplication(params: { jobId: string; userId: string;
   }
 }
 
-export async function getResumeText(url: string) {
-  try {
-    const response = await fetch(url);
-    const buffer = await response.arrayBuffer();
-    const data = await pdf(Buffer.from(buffer));
-    return data.text;
-  } catch (error) {
-    console.error("PDF Parsing Error:", error);
-    return "";
-  }
-}
+// lib/actions/general.action.ts
+
+
+
