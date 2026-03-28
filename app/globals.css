@@ -1,98 +1,125 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+/* ─────────────────────────────────────────────
+   MODERN JAMAICAN PALETTE
+   Primary: #009B3A (Jamaica Green)
+   Accent:  #FED100 (Jamaica Gold)
+   Base:    #0D0D0D (Warm Black)
+───────────────────────────────────────────── */
+
 @theme {
+  /* Brand */
+  --color-jamaica-green:  #009B3A;
+  --color-jamaica-gold:   #FED100;
+  --color-jamaica-black:  #0D0D0D;
+
+  /* Success / Destructive */
   --color-success-100: #49de50;
   --color-success-200: #42c748;
   --color-destructive-100: #f1511b;
   --color-destructive-200: #d43c0f;
-  --color-primary-100: #f4f6fc;
-  --color-primary-200: #050a30;
-  --color-light-100: #f4f6fc;
-  --color-light-400: #6870a6;
-  --color-light-600: #4f557d;
-  --color-light-800: #24273a;
-  --color-dark-100: #050a30;
-  --color-dark-200: #0d112e;
-  --color-dark-300: #141a3a;
-  --font-mona-sans: "Mona Sans", sans-serif;
+
+  /* Primary (green replaces old deep navy) */
+  --color-primary-100: #F5F5F0;
+  --color-primary-200: #009B3A;
+
+  /* Light scale — warm neutrals instead of cool blue-grays */
+  --color-light-100: #F5F5F0;
+  --color-light-400: #9A9A8A;
+  --color-light-600: #6B6B5A;
+  --color-light-800: #2A2A1F;
+
+  /* Dark scale — warm blacks instead of cold navies */
+  --color-dark-100: #0D0D0D;
+  --color-dark-200: #111111;
+  --color-dark-300: #1A1A1A;
+
+  /* Typography */
+  --font-montserrat: "Montserrat", sans-serif;
+
+  /* Background pattern */
   --bg-pattern: url("/pattern.png");
 }
 
+/* ─────────────────────────────────────────────
+   CSS CUSTOM PROPERTIES (Shadcn tokens)
+───────────────────────────────────────────── */
+
 :root {
-  --radius: 0.625rem;
-  --background: #f4f6fc;
-  --foreground: #050a30;
+  --radius: 1rem;
+  --background: #F5F5F0;
+  --foreground: #0D0D0D;
   --card: #ffffff;
-  --card-foreground: #050a30;
+  --card-foreground: #0D0D0D;
   --popover: #ffffff;
-  --popover-foreground: #050a30;
-  --primary: #050a30;
-  --primary-foreground: #f4f6fc;
-  --secondary: #e6eaf3;
-  --secondary-foreground: #050a30;
-  --muted: #e6eaf3;
-  --muted-foreground: #5d648b;
-  --accent: #e6eaf3;
-  --accent-foreground: #050a30;
+  --popover-foreground: #0D0D0D;
+  --primary: #009B3A;
+  --primary-foreground: #F5F5F0;
+  --secondary: #E8F5E9;
+  --secondary-foreground: #0D0D0D;
+  --muted: #E8F5E9;
+  --muted-foreground: #6B6B5A;
+  --accent: #FED100;
+  --accent-foreground: #0D0D0D;
   --destructive: #f1511b;
-  --border: #d0d5e6;
-  --input: #d0d5e6;
-  --ring: #a1a8c0;
-  --chart-1: #3d4fcc;
-  --chart-2: #5d6de8;
-  --chart-3: #7c8bf4;
-  --chart-4: #9ba9ff;
-  --chart-5: #bac6ff;
+  --border: rgba(0, 155, 58, 0.2);
+  --input: rgba(0, 155, 58, 0.12);
+  --ring: #009B3A;
+  --chart-1: #009B3A;
+  --chart-2: #00c94b;
+  --chart-3: #FED100;
+  --chart-4: #f5c400;
+  --chart-5: #eba800;
   --sidebar: #ffffff;
-  --sidebar-foreground: #050a30;
-  --sidebar-primary: #050a30;
-  --sidebar-primary-foreground: #f4f6fc;
-  --sidebar-accent: #e6eaf3;
-  --sidebar-accent-foreground: #050a30;
-  --sidebar-border: #d0d5e6;
-  --sidebar-ring: #a1a8c0;
+  --sidebar-foreground: #0D0D0D;
+  --sidebar-primary: #009B3A;
+  --sidebar-primary-foreground: #F5F5F0;
+  --sidebar-accent: #E8F5E9;
+  --sidebar-accent-foreground: #0D0D0D;
+  --sidebar-border: rgba(0, 155, 58, 0.2);
+  --sidebar-ring: #009B3A;
 }
 
 .dark {
-  --background: #050a30;
-  --foreground: #f4f6fc;
-  --card: #0a103a;
-  --card-foreground: #f4f6fc;
-  --popover: #0a103a;
-  --popover-foreground: #f4f6fc;
-  --primary: #f4f6fc;
-  --primary-foreground: #050a30;
-  --secondary: #0d112e;
-  --secondary-foreground: #f4f6fc;
-  --muted: #0d112e;
-  --muted-foreground: #a1a8c0;
-  --accent: #0d112e;
-  --accent-foreground: #f4f6fc;
+  --background: #0D0D0D;
+  --foreground: #F5F5F0;
+  --card: #111111;
+  --card-foreground: #F5F5F0;
+  --popover: #111111;
+  --popover-foreground: #F5F5F0;
+  --primary: #009B3A;
+  --primary-foreground: #F5F5F0;
+  --secondary: #1A1A1A;
+  --secondary-foreground: #F5F5F0;
+  --muted: #1A1A1A;
+  --muted-foreground: #9A9A8A;
+  --accent: #FED100;
+  --accent-foreground: #0D0D0D;
   --destructive: #f1511b;
-  --border: rgba(244, 246, 252, 0.1);
-  --input: rgba(244, 246, 252, 0.15);
-  --ring: #6870a6;
-  --chart-1: #7c8bf4;
-  --chart-2: #5d6de8;
-  --chart-3: #3d4fcc;
-  --chart-4: #2d3fb0;
-  --chart-5: #1d2f94;
-  --sidebar: #0a103a;
-  --sidebar-foreground: #f4f6fc;
-  --sidebar-primary: #f4f6fc;
-  --sidebar-primary-foreground: #050a30;
-  --sidebar-accent: #0d112e;
-  --sidebar-accent-foreground: #f4f6fc;
-  --sidebar-border: rgba(244, 246, 252, 0.1);
-  --sidebar-ring: #6870a6;
+  --border: rgba(0, 155, 58, 0.2);
+  --input: rgba(254, 209, 0, 0.1);
+  --ring: #009B3A;
+  --chart-1: #009B3A;
+  --chart-2: #00c94b;
+  --chart-3: #FED100;
+  --chart-4: #f5c400;
+  --chart-5: #eba800;
+  --sidebar: #111111;
+  --sidebar-foreground: #F5F5F0;
+  --sidebar-primary: #009B3A;
+  --sidebar-primary-foreground: #F5F5F0;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #F5F5F0;
+  --sidebar-border: rgba(0, 155, 58, 0.2);
+  --sidebar-ring: #009B3A;
 }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -126,18 +153,26 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ─────────────────────────────────────────────
+   BASE LAYER
+───────────────────────────────────────────── */
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-montserrat), sans-serif;
   }
   p {
     @apply text-light-100;
   }
+  h1 {
+    @apply font-bold tracking-tight;
+  }
   h2 {
-    @apply text-3xl font-semibold;
+    @apply text-3xl font-bold tracking-tight;
   }
   h3 {
     @apply text-2xl font-semibold;
@@ -150,57 +185,80 @@
   }
 }
 
+/* ─────────────────────────────────────────────
+   COMPONENT LAYER
+───────────────────────────────────────────── */
+
 @layer components {
+
+  /* ── Buttons ── */
   .btn-call {
-    @apply inline-block px-7 py-3 font-bold text-sm leading-5 text-white transition-colors duration-150 bg-success-100 border border-transparent rounded-full shadow-sm focus:outline-none focus:shadow-2xl active:bg-success-200 hover:bg-success-200 min-w-28 cursor-pointer items-center justify-center overflow-visible;
+    @apply inline-block px-7 py-3 font-bold text-sm leading-5 text-white
+           transition-colors duration-150
+           bg-jamaica-green border border-transparent rounded-full shadow-sm
+           focus:outline-none focus:shadow-2xl
+           active:bg-success-200 hover:bg-success-200
+           min-w-28 cursor-pointer items-center justify-center overflow-visible;
 
     .span {
-      @apply bg-success-100 h-[85%] w-[65%];
+      @apply bg-jamaica-green h-[85%] w-[65%];
     }
   }
 
   .btn-disconnect {
-    @apply inline-block px-7 py-3 text-sm font-bold leading-5 text-white transition-colors duration-150 bg-destructive-100 border border-transparent rounded-full shadow-sm focus:outline-none focus:shadow-2xl active:bg-destructive-200 hover:bg-destructive-200 min-w-28;
+    @apply inline-block px-7 py-3 text-sm font-bold leading-5 text-white
+           transition-colors duration-150
+           bg-destructive-100 border border-transparent rounded-full shadow-sm
+           focus:outline-none active:bg-destructive-200 hover:bg-destructive-200 min-w-28;
   }
 
-  .btn-upload {
-    @apply flex min-h-14 w-full items-center justify-center gap-1.5 rounded-md;
-  }
   .btn-primary {
-    @apply w-fit !bg-primary-200 !text-light-100 hover:!bg-primary-200/90 !rounded-full !font-bold px-5 cursor-pointer min-h-10;
+    @apply w-fit !bg-jamaica-green !text-white hover:!bg-[#007d2f]
+           !rounded-full !font-bold px-5 cursor-pointer min-h-10
+           transition-colors duration-150;
   }
+
   .btn-secondary {
-    @apply w-fit !bg-dark-200 !text-primary-100 hover:!bg-dark-200/80 !rounded-full !font-bold px-5 cursor-pointer min-h-10;
+    @apply w-fit !bg-dark-200 !text-primary-100
+           hover:!bg-dark-300 !rounded-full !font-bold px-5
+           cursor-pointer min-h-10 border border-jamaica-gold/30;
   }
 
   .btn-upload {
-    @apply bg-dark-200 rounded-full min-h-12 px-5 cursor-pointer border border-input overflow-hidden;
+    @apply bg-dark-200 rounded-full min-h-12 px-5 cursor-pointer
+           border border-input overflow-hidden;
   }
 
+  /* ── Card primitives ── */
   .card-border {
-    @apply border-gradient p-0.5 rounded-2xl w-fit;
+    @apply border-gradient p-0.5 rounded-3xl w-fit;
   }
 
   .card {
-    @apply dark-gradient rounded-2xl min-h-full;
+    @apply dark-gradient rounded-3xl min-h-full;
   }
 
+  /* ── Auth form ── */
   .form {
     @apply w-full;
 
     .label {
-      @apply !text-light-100 !font-normal;
+      @apply !text-light-100 !font-medium;
     }
 
     .input {
-      @apply !bg-dark-200 !rounded-full !min-h-12 !px-5 placeholder:!text-light-400;
+      @apply !bg-dark-200 !rounded-full !min-h-12 !px-5
+             placeholder:!text-light-400 border-jamaica-green/20;
     }
 
     .btn {
-      @apply !w-full !bg-primary-200 !text-light-100 hover:!bg-primary-200/90 !rounded-full !min-h-10 !font-bold !px-5 cursor-pointer;
+      @apply !w-full !bg-jamaica-green !text-white
+             hover:!bg-[#007d2f] !rounded-full !min-h-10
+             !font-bold !px-5 cursor-pointer transition-colors;
     }
   }
 
+  /* ── Voice call view ── */
   .call-view {
     @apply flex sm:flex-row flex-col gap-10 items-center justify-between w-full;
 
@@ -209,31 +267,39 @@
     }
 
     .card-interviewer {
-      @apply flex-center flex-col gap-2 p-7 h-[400px] blue-gradient-dark rounded-lg border-2 border-primary-200/50 flex-1 sm:basis-1/2 w-full;
+      @apply flex-center flex-col gap-2 p-7 h-[400px]
+             tropical-gradient rounded-2xl
+             border-2 border-jamaica-green/40
+             flex-1 sm:basis-1/2 w-full;
     }
 
     .avatar {
-      @apply z-10 flex items-center justify-center blue-gradient rounded-full size-[120px] relative;
+      @apply z-10 flex items-center justify-center
+             tropical-light rounded-full size-[120px] relative;
 
       .animate-speak {
-        @apply absolute inline-flex size-5/6 animate-ping rounded-full bg-primary-200 opacity-75;
+        @apply absolute inline-flex size-5/6 animate-ping
+               rounded-full bg-jamaica-green opacity-75;
       }
     }
 
     .card-border {
-      @apply border-gradient p-0.5 rounded-2xl flex-1 sm:basis-1/2 w-full h-[400px] max-md:hidden;
+      @apply border-gradient p-0.5 rounded-3xl flex-1 sm:basis-1/2 w-full h-[400px] max-md:hidden;
     }
 
     .card-content {
-      @apply flex flex-col gap-2 justify-center items-center p-7 dark-gradient rounded-2xl min-h-full;
+      @apply flex flex-col gap-2 justify-center items-center p-7
+             dark-gradient rounded-3xl min-h-full;
     }
   }
 
+  /* ── Transcript ── */
   .transcript-border {
-    @apply border-gradient p-0.5 rounded-2xl w-full;
+    @apply border-gradient p-0.5 rounded-3xl w-full;
 
     .transcript {
-      @apply dark-gradient rounded-2xl min-h-12 px-5 py-3 flex items-center justify-center;
+      @apply dark-gradient rounded-3xl min-h-12 px-5 py-3
+             flex items-center justify-center;
 
       p {
         @apply text-lg text-center text-white;
@@ -241,6 +307,7 @@
     }
   }
 
+  /* ── Feedback section ── */
   .section-feedback {
     @apply flex flex-col gap-8 max-w-5xl mx-auto max-sm:px-4 text-lg leading-7;
 
@@ -249,61 +316,130 @@
     }
   }
 
+  /* ── Layouts ── */
   .auth-layout {
-    @apply flex items-center justify-center mx-auto max-w-7xl min-h-screen max-sm:px-4 max-sm:py-8;
+    @apply flex items-center justify-center mx-auto max-w-7xl
+           min-h-screen max-sm:px-4 max-sm:py-8;
   }
 
   .root-layout {
-    @apply flex mx-auto max-w-7xl flex-col gap-12 my-12 px-16 max-sm:px-4 max-sm:my-8;
+    @apply flex mx-auto max-w-7xl flex-col gap-12 my-12
+           px-16 max-sm:px-4 max-sm:my-8;
   }
 
+  /* ── Hero CTA strip ── */
   .card-cta {
-    @apply flex flex-row blue-gradient-dark rounded-3xl px-16 py-6 items-center justify-between max-sm:px-4;
+    @apply flex flex-row tropical-gradient rounded-3xl px-16 py-8
+           items-center justify-between max-sm:px-6
+           border border-jamaica-green/30
+           relative overflow-hidden;
   }
 
+  /* ── Job/interview grid ── */
   .interviews-section {
-    @apply flex flex-wrap gap-4 max-lg:flex-col w-full items-stretch;
+    @apply flex flex-wrap gap-6 max-lg:flex-col w-full items-stretch;
   }
 
   .interview-text {
     @apply text-lg text-center text-white;
   }
 
+  /* ── Progress bar ── */
   .progress {
-    @apply h-1.5 text-[5px] font-bold bg-primary-200 rounded-full flex-center;
+    @apply h-1.5 text-[5px] font-bold bg-jamaica-green rounded-full flex-center;
   }
 
+  /* ── Tooltip ── */
   .tech-tooltip {
-    @apply absolute bottom-full mb-1 hidden group-hover:flex px-2 py-1 text-xs text-white bg-gray-700 rounded-md shadow-md;
+    @apply absolute bottom-full mb-1 hidden group-hover:flex
+           px-2 py-1 text-xs text-white bg-dark-300 rounded-lg shadow-md;
   }
 
+  /* ── Job / Interview card body ── */
   .card-interview {
-    @apply dark-gradient rounded-2xl min-h-full flex flex-col p-6 relative overflow-hidden gap-10 justify-between;
+    @apply dark-gradient rounded-3xl min-h-full flex flex-col
+           p-6 relative overflow-hidden gap-8 justify-between;
 
     .badge-text {
-      @apply text-sm font-semibold capitalize;
+      @apply text-xs font-bold uppercase tracking-wider;
     }
+  }
+
+  /* ── Parish filter chip ── */
+  .parish-chip {
+    @apply px-3 py-1.5 rounded-full text-xs font-semibold
+           transition-all duration-150 cursor-pointer
+           border border-transparent;
+  }
+
+  .parish-chip-active {
+    @apply bg-jamaica-gold text-black border-jamaica-gold;
+  }
+
+  .parish-chip-inactive {
+    @apply bg-dark-300 text-light-400
+           border-light-800
+           hover:border-jamaica-gold/50 hover:text-light-100;
+  }
+
+  /* ── Type filter chip ── */
+  .type-chip {
+    @apply px-4 py-1.5 rounded-full text-sm font-bold
+           transition-all duration-150 cursor-pointer capitalize;
+  }
+
+  .type-chip-active {
+    @apply bg-jamaica-green text-white;
+  }
+
+  .type-chip-inactive {
+    @apply bg-dark-300 text-light-400
+           hover:text-light-100;
   }
 }
 
+/* ─────────────────────────────────────────────
+   UTILITY LAYER
+───────────────────────────────────────────── */
+
+/* Warm dark gradient (cards, surfaces) */
 @utility dark-gradient {
-  @apply bg-gradient-to-b from-[#050a30] to-[#02051a];
+  background: linear-gradient(160deg, #111111 0%, #0A0A0A 100%);
 }
 
+/* Hero / CTA gradient — deep tropical green-black */
+@utility tropical-gradient {
+  background: linear-gradient(145deg, #0A1F0A 0%, #060C06 100%);
+}
+
+/* Avatar background — muted light green shimmer */
+@utility tropical-light {
+  background: linear-gradient(135deg, #C8E6C9 0%, #E8F5E9 100%);
+}
+
+/* Keep blue-gradient-dark as alias to tropical-gradient for backward compat */
+@utility blue-gradient-dark {
+  background: linear-gradient(145deg, #0A1F0A 0%, #060C06 100%);
+}
+
+/* Keep blue-gradient as alias to tropical-light for backward compat */
+@utility blue-gradient {
+  background: linear-gradient(135deg, #C8E6C9 0%, #E8F5E9 100%);
+}
+
+/* Gold → Green border shimmer */
 @utility border-gradient {
-  @apply bg-gradient-to-b from-[#4B4D4F] to-[#4B4D4F33];
+  background: linear-gradient(160deg, rgba(254,209,0,0.45) 0%, rgba(0,155,58,0.15) 100%);
 }
 
+/* Subtle gold shimmer for highlights */
+@utility gold-shimmer {
+  background: linear-gradient(135deg, #FED100 0%, #f5c400 100%);
+}
+
+/* Background pattern */
 @utility pattern {
   @apply bg-[url('/pattern.png')] bg-top bg-no-repeat;
-}
-
-@utility blue-gradient-dark {
-  @apply bg-gradient-to-b from-[#050a30] to-[#02051a];
-}
-
-@utility blue-gradient {
-  @apply bg-gradient-to-l from-[#f4f6fc] to-[#e0e4f0];
 }
 
 @utility flex-center {
@@ -314,10 +450,14 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
+/* ─────────────────────────────────────────────
+   KEYFRAMES
+───────────────────────────────────────────── */
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
