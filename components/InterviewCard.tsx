@@ -26,12 +26,13 @@ const InterviewCard = async ({
 
   const normalizedType = /mix/gi.test(type) ? "Mixed" : type;
 
+  // Jamaica-palette badge colours
   const badgeColor =
     {
-      Behavioral: "bg-light-400",
-      Mixed: "bg-light-600",
-      Technical: "bg-light-800",
-    }[normalizedType] || "bg-light-600";
+      Behavioral: "bg-jamaica-gold/20 text-jamaica-gold",
+      Mixed: "bg-light-600/30 text-light-400",
+      Technical: "bg-jamaica-green/20 text-jamaica-green",
+    }[normalizedType] ?? "bg-light-600/30 text-light-400";
 
   const formattedDate = dayjs(
     feedback?.createdAt || createdAt || Date.now()
@@ -39,16 +40,17 @@ const InterviewCard = async ({
 
   return (
     <div className="card-border w-[360px] max-sm:w-full min-h-96">
+      {/* Glass card body — replaces old dark-gradient */}
       <div className="card-interview">
         <div>
           {/* Type Badge */}
           <div
             className={cn(
-              "absolute top-0 right-0 w-fit px-4 py-2 rounded-bl-lg",
+              "absolute top-0 right-0 px-3 py-1.5 rounded-bl-2xl text-xs font-bold uppercase tracking-wider",
               badgeColor
             )}
           >
-            <p className="badge-text ">{normalizedType}</p>
+            {normalizedType}
           </div>
 
           {/* Cover Image */}
@@ -65,30 +67,43 @@ const InterviewCard = async ({
 
           {/* Date & Score */}
           <div className="flex flex-row gap-5 mt-3">
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 items-center">
               <Image
                 src="/calendar.svg"
                 width={22}
                 height={22}
                 alt="calendar"
               />
-              <p>{formattedDate}</p>
+              <p className="text-sm text-light-400">{formattedDate}</p>
             </div>
 
             <div className="flex flex-row gap-2 items-center">
               <Image src="/star.svg" width={22} height={22} alt="star" />
-              <p>{feedback?.totalScore || "---"}/100</p>
+              <p
+                className={cn(
+                  "text-sm font-bold",
+                  feedback?.totalScore
+                    ? feedback.totalScore >= 75
+                      ? "text-jamaica-green"
+                      : feedback.totalScore >= 50
+                        ? "text-jamaica-gold"
+                        : "text-destructive-100"
+                    : "text-light-400"
+                )}
+              >
+                {feedback?.totalScore || "---"}/100
+              </p>
             </div>
           </div>
 
-          {/* Feedback or Placeholder Text */}
-          <p className="line-clamp-2 mt-5">
+          {/* Feedback or Placeholder */}
+          <p className="line-clamp-2 mt-5 text-sm text-light-400 leading-relaxed">
             {feedback?.finalAssessment ||
               "You haven't taken this interview yet. Take it now to improve your skills."}
           </p>
         </div>
 
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between items-center">
           <DisplayTechIcons techStack={techstack} />
 
           <Button className="btn-primary">

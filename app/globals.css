@@ -37,6 +37,7 @@
 
   /* Typography */
   --font-montserrat: "Montserrat", sans-serif;
+  --font-bebas-neue: "Bebas Neue", cursive;
 
   /* Background pattern */
   --bg-pattern: url("/pattern.png");
@@ -168,14 +169,20 @@
   p {
     @apply text-light-100;
   }
+  /* Bebas Neue — display/header font for the "Kingston Pulse" feel */
+  h1, h2 {
+    font-family: var(--font-bebas-neue), cursive;
+    @apply tracking-wide;
+  }
   h1 {
-    @apply font-bold tracking-tight;
+    @apply text-4xl;
   }
   h2 {
-    @apply text-3xl font-bold tracking-tight;
+    @apply text-3xl;
   }
+  /* h3 stays Montserrat for sub-headings and card titles */
   h3 {
-    @apply text-2xl font-semibold;
+    @apply text-xl font-bold tracking-tight;
   }
   ul {
     @apply list-disc list-inside;
@@ -355,9 +362,9 @@
            px-2 py-1 text-xs text-white bg-dark-300 rounded-lg shadow-md;
   }
 
-  /* ── Job / Interview card body ── */
+  /* ── Job / Interview card body — glassmorphism ── */
   .card-interview {
-    @apply dark-gradient rounded-3xl min-h-full flex flex-col
+    @apply glass-card-green rounded-3xl min-h-full flex flex-col
            p-6 relative overflow-hidden gap-8 justify-between;
 
     .badge-text {
@@ -402,6 +409,34 @@
    UTILITY LAYER
 ───────────────────────────────────────────── */
 
+/* ─── Glassmorphism utilities ─────────────────────────────────────── */
+
+/* Neutral glass — for overlays and secondary surfaces */
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Green-tinted glass — for job/gig cards (Jamaica green hint) */
+@utility glass-card-green {
+  background: rgba(0, 155, 58, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 155, 58, 0.15);
+}
+
+/* Gold-tinted glass — for accent panels */
+@utility glass-card-gold {
+  background: rgba(254, 209, 0, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(254, 209, 0, 0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────── */
+
 /* Warm dark gradient (cards, surfaces) */
 @utility dark-gradient {
   background: linear-gradient(160deg, #111111 0%, #0A0A0A 100%);
@@ -440,6 +475,15 @@
 /* Background pattern */
 @utility pattern {
   @apply bg-[url('/pattern.png')] bg-top bg-no-repeat;
+}
+
+@utility font-montserrat {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+@utility font-bebas {
+  font-family: var(--font-bebas-neue), cursive;
+  letter-spacing: 0.05em;
 }
 
 @utility flex-center {
