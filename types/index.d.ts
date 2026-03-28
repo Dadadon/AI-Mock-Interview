@@ -23,6 +23,8 @@ interface Interview {
   userId: string;
   type: string;
   finalized: boolean;
+  /** Distinguishes practice sessions from live job screenings */
+  scenario?: "practice" | "job_screening";
 }
 
 interface CreateFeedbackParams {
