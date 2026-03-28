@@ -28,6 +28,10 @@ const Agent = ({
   feedbackId,
   type,
   questions,
+  scenario,
+  jobId,
+  employerId,
+  jobTitle,
 }: AgentProps) => {
   const router = useRouter();
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -108,20 +112,33 @@ const Agent = ({
     if (callStatus === CallStatus.FINISHED) {
       if (type === "generate") {
         router.push("/");
+      } else if (type === "job_apply") {
+        router.push(`/apply/${jobId}/success`);
       } else {
         handleGenerateFeedback(messages);
       }
     }
-  }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
+  }, [messages, callStatus, feedbackId, interviewId, jobId, router, type, userId]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    if (type === "generate") {
+    if (type === "generate" || type === "job_apply") {
       await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
         variableValues: {
           username: userName,
           userid: userId,
+          scenario: scenario,
+          jobId: jobId || "",
+          employerId: employerId || "",
+          jobTitle: jobTitle || "",
+        },
+        metadata: {
+          userId: userId || "",
+          jobId: jobId || "",
+          employerId: employerId || "",
+          applicantName: userName,
+          jobTitle: jobTitle || "",
         },
       });
     } else {
