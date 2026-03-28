@@ -36,6 +36,7 @@ interface User {
   name: string;
   email: string;
   id: string;
+  role?: "applicant" | "employer";
 }
 
 interface InterviewCardProps {
@@ -45,6 +46,7 @@ interface InterviewCardProps {
   type: string;
   techstack: string[];
   createdAt?: string;
+  isNew?: boolean;
 }
 
 interface AgentProps {
@@ -52,8 +54,12 @@ interface AgentProps {
   userId?: string;
   interviewId?: string;
   feedbackId?: string;
-  type: "generate" | "interview";
+  type: "generate" | "interview" | "job_apply";
   questions?: string[];
+  scenario?: "practice" | "job_screening" | "gig_inquiry";
+  jobId?: string;
+  employerId?: string;
+  jobTitle?: string;
 }
 
 interface RouteParams {
@@ -81,6 +87,7 @@ interface SignUpParams {
   name: string;
   email: string;
   password: string;
+  role?: "applicant" | "employer";
 }
 
 type FormType = "sign-in" | "sign-up";
@@ -96,4 +103,50 @@ interface InterviewFormProps {
 
 interface TechIconProps {
   techStack: string[];
+}
+
+// Neat Gigz / Career Hub types
+
+interface Job {
+  id: string;
+  employerId: string;
+  title: string;
+  description: string;
+  type: "gig" | "job";
+  parish: string;
+  pay: string;
+  category: string;
+  criteria: string[];
+  createdAt: string;
+}
+
+interface Application {
+  id: string;
+  userId: string;
+  jobId: string;
+  employerId: string;
+  applicantName: string;
+  jobTitle: string;
+  status: "completed" | "reviewed";
+  transcript: string;
+  score: number;
+  summary: string;
+  callId: string;
+  createdAt: string;
+}
+
+interface CreateJobParams {
+  employerId: string;
+  title: string;
+  description: string;
+  type: "gig" | "job";
+  parish: string;
+  pay: string;
+  category: string;
+  criteria: string[];
+}
+
+interface JobCardProps {
+  job: Job;
+  currentUserId?: string;
 }

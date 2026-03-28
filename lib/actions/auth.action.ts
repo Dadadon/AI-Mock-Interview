@@ -26,7 +26,7 @@ export async function setSessionCookie(idToken: string) {
 }
 
 export async function signUp(params: SignUpParams) {
-  const { uid, name, email } = params;
+  const { uid, name, email, role } = params;
 
   try {
     // check if user exists in db
@@ -41,8 +41,7 @@ export async function signUp(params: SignUpParams) {
     await db.collection("users").doc(uid).set({
       name,
       email,
-      // profileURL,
-      // resumeURL,
+      role: role || "applicant",
     });
 
     return {
@@ -116,6 +115,7 @@ export async function getCurrentUser(): Promise<User | null> {
     return {
       ...userRecord.data(),
       id: userRecord.id,
+      role: userRecord.data()?.role || "applicant",
     } as User;
   } catch (error) {
     console.log(error);
