@@ -62,6 +62,8 @@ interface AgentProps {
   jobId?: string;
   employerId?: string;
   jobTitle?: string;
+  /** AI-generated questions specific to the job listing */
+  screeningQuestions?: string[];
 }
 
 interface RouteParams {
@@ -119,6 +121,8 @@ interface Job {
   pay: string;
   category: string;
   criteria: string[];
+  /** AI-generated screening questions unique to this listing */
+  screeningQuestions?: string[];
   createdAt: string;
 }
 
