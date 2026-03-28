@@ -5,6 +5,19 @@ import { db } from "@/firebase/admin";
 import { feedbackSchema } from "@/constants";
 
 export async function POST(request: Request) {
+  // ── Webhook secret verification ──────────────────────────────────────
+  // Set VAPI_WEBHOOK_SECRET in your Vapi dashboard (Webhook → Secret) and
+  // in your environment variables. Vapi sends it as the x-vapi-secret header.
+  // In development without the env var set, the check is skipped (graceful
+  // degradation). In production this MUST be configured.
+  const incomingSecret = request.headers.get("x-vapi-secret");
+  const expectedSecret = process.env.VAPI_WEBHOOK_SECRET;
+
+  if (expectedSecret && incomingSecret !== expectedSecret) {
+    console.warn("[vapi/webhook] Rejected request — secret mismatch");
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const { message } = body;
 

@@ -1,3 +1,8 @@
+// This module must ONLY run on the server.
+// The "server-only" package causes a build error if accidentally imported
+// by a Client Component, protecting the Firebase service account credentials.
+import "server-only";
+
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
