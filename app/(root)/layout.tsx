@@ -17,7 +17,26 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           <h2 className="text-primary-100">GetHiredAI</h2>
         </Link>
 
-        {/* Optional: Add navigation links or user menu here */}
+        <div className="flex items-center gap-6 text-sm">
+          <Link
+            href="/marketplace"
+            className="text-light-400 hover:text-light-100 transition-colors"
+          >
+            Marketplace
+          </Link>
+          <Link
+            href="/dashboard/hrm"
+            className="text-light-400 hover:text-light-100 transition-colors"
+          >
+            HRM Dashboard
+          </Link>
+          <Link
+            href="/dashboard/jobs/create"
+            className="text-light-400 hover:text-light-100 transition-colors"
+          >
+            Post a Job
+          </Link>
+        </div>
       </nav>
 
       <main className="flex-1">{children}</main>
