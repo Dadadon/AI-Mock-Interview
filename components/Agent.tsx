@@ -29,7 +29,6 @@ const Agent = ({
   feedbackId,
   type,
   questions,
-  scenario,
   jobId,
   employerId,
   jobTitle,
@@ -142,32 +141,42 @@ const Agent = ({
       toast.error("NEXT_PUBLIC_VAPI_WEB_TOKEN is not set in .env.local");
       return;
     }
-    if (
-      (type === "generate" || type === "job_apply") &&
-      !process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID
-    ) {
+
+    const practiceWorkflowId = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID;
+    const screeningWorkflowId = process.env.NEXT_PUBLIC_VAPI_SCREENING_WORKFLOW_ID;
+
+    if (type === "generate" && !practiceWorkflowId) {
       toast.error("NEXT_PUBLIC_VAPI_WORKFLOW_ID is not set in .env.local");
+      return;
+    }
+    if (type === "job_apply" && !screeningWorkflowId) {
+      toast.error("NEXT_PUBLIC_VAPI_SCREENING_WORKFLOW_ID is not set in .env.local");
       return;
     }
 
     setCallStatus(CallStatus.CONNECTING);
 
-    if (type === "generate" || type === "job_apply") {
-      // Format job-specific screening questions for the workflow if available
+    if (type === "generate") {
+      await vapi.start(practiceWorkflowId!, {
+        variableValues: {
+          username: userName,
+          userid: userId,
+          scenario: "practice",
+        },
+      });
+    } else if (type === "job_apply") {
       const formattedScreening =
         screeningQuestions && screeningQuestions.length > 0
           ? screeningQuestions.map((q) => `- ${q}`).join("\n")
           : "";
 
-      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+      await vapi.start(screeningWorkflowId!, {
         variableValues: {
           username: userName,
           userid: userId,
-          scenario: scenario,
           jobId: jobId || "",
           employerId: employerId || "",
           jobTitle: jobTitle || "",
-          // Job-specific questions override the generic workflow questions
           screeningQuestions: formattedScreening,
         },
         metadata: {
