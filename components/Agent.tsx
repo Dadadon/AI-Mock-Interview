@@ -67,7 +67,24 @@ const Agent = ({
 
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
-    const onError = (error: Error) => console.error("[Vapi error]", error);
+    const onError = (error: Error) => {
+      // Vapi sometimes emits a plain object instead of an Error instance.
+      // Stringify it so the details are always visible in the console.
+      const detail =
+        error instanceof Error
+          ? error.message
+          : JSON.stringify(error, null, 2);
+      console.error("[Vapi error]", detail, error);
+
+      // Surface the error to the user and reset so they can retry
+      toast.error(
+        detail?.includes("token") || detail === "{}"
+          ? "Could not start call — check your Vapi token in .env.local"
+          : `Call error: ${detail || "unknown Vapi error"}`
+      );
+      setCallStatus(CallStatus.INACTIVE);
+      setHasCommitted(false);
+    };
 
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
@@ -120,6 +137,19 @@ const Agent = ({
 
   // ── Call handlers ────────────────────────────────────────────────
   const handleCall = async () => {
+    // Pre-flight env check — fail fast with a clear message
+    if (!process.env.NEXT_PUBLIC_VAPI_WEB_TOKEN) {
+      toast.error("NEXT_PUBLIC_VAPI_WEB_TOKEN is not set in .env.local");
+      return;
+    }
+    if (
+      (type === "generate" || type === "job_apply") &&
+      !process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID
+    ) {
+      toast.error("NEXT_PUBLIC_VAPI_WORKFLOW_ID is not set in .env.local");
+      return;
+    }
+
     setCallStatus(CallStatus.CONNECTING);
 
     if (type === "generate" || type === "job_apply") {
