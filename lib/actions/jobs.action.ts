@@ -38,14 +38,25 @@ REQUIREMENTS:
 
     let screeningQuestions: string[] = [];
     try {
-      screeningQuestions = JSON.parse(rawQuestions.trim());
+      // Strip markdown code fences Gemini sometimes wraps around JSON
+      const cleaned = rawQuestions
+        .trim()
+        .replace(/^```json?\s*/i, "")
+        .replace(/```\s*$/, "")
+        .trim();
+      screeningQuestions = JSON.parse(cleaned);
     } catch {
-      // Fallback: split on newlines and take the first 4 non-empty lines
-      screeningQuestions = rawQuestions
-        .split("\n")
-        .map((l) => l.replace(/^[-\d.)\s]+/, "").trim())
-        .filter(Boolean)
-        .slice(0, 4);
+      // Fallback: extract quoted question strings
+      const matches = rawQuestions.match(/"([^"]+\?)"/g);
+      if (matches && matches.length >= 2) {
+        screeningQuestions = matches.map((m) => m.replace(/^"|"$/g, "")).slice(0, 4);
+      } else {
+        screeningQuestions = rawQuestions
+          .split("\n")
+          .map((l) => l.replace(/^[\s\-\d.)"'`]+/, "").replace(/["'`]$/, "").trim())
+          .filter((l) => l.length > 10 && l.includes("?"))
+          .slice(0, 4);
+      }
     }
 
     // ── Persist job document ─────────────────────────────────────────
@@ -112,4 +123,35 @@ export async function getApplicationsByJobId(
     id: doc.id,
     ...doc.data(),
   })) as Application[];
+}
+
+export async function getApplicationById(
+  applicationId: string
+): Promise<Application | null> {
+  const doc = await db.collection("applications").doc(applicationId).get();
+  if (!doc.exists) return null;
+  return { id: doc.id, ...doc.data() } as Application;
+}
+
+export async function createApplication(params: {
+  userId: string;
+  jobId: string;
+  employerId: string;
+  applicantName: string;
+  jobTitle: string;
+  resumeUrl?: string;
+  resumeText?: string;
+}): Promise<{ success: boolean; applicationId?: string }> {
+  try {
+    const ref = db.collection("applications").doc();
+    await ref.set({
+      ...params,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
+    return { success: true, applicationId: ref.id };
+  } catch (error) {
+    console.error("[createApplication] Error:", error);
+    return { success: false };
+  }
 }
