@@ -64,6 +64,8 @@ interface AgentProps {
   jobTitle?: string;
   /** AI-generated questions specific to the job listing */
   screeningQuestions?: string[];
+  /** Firestore application document ID — threads both Vapi call phases */
+  applicationId?: string;
 }
 
 interface RouteParams {
@@ -133,12 +135,23 @@ interface Application {
   employerId: string;
   applicantName: string;
   jobTitle: string;
-  status: "completed" | "reviewed";
-  transcript: string;
-  score: number;
-  summary: string;
-  callId: string;
+  /** State machine: pending → screening_failed | interview_pending → complete */
+  status: "pending" | "screening_failed" | "interview_pending" | "complete";
+  // Resume
+  resumeUrl?: string;
+  resumeText?: string;
+  // Screening phase
+  screeningScore?: number;
+  screeningPassed?: boolean;
+  screeningTranscript?: string;
+  screeningSummary?: string;
+  // Interview phase
+  interviewQuestions?: string[];
+  interviewScore?: number;
+  interviewTranscript?: string;
+  interviewSummary?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 interface CreateJobParams {
