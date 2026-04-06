@@ -33,6 +33,7 @@ const Agent = ({
   employerId,
   jobTitle,
   screeningQuestions,
+  applicationId,
 }: AgentProps) => {
   const router = useRouter();
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
@@ -127,7 +128,7 @@ const Agent = ({
       if (type === "generate") {
         router.push("/");
       } else if (type === "job_apply") {
-        router.push(`/apply/${jobId}/success`);
+        router.push(`/apply/${jobId}/processing?applicationId=${applicationId ?? ""}`);
       } else {
         handleGenerateFeedback(messages);
       }
@@ -185,6 +186,8 @@ const Agent = ({
           employerId: employerId || "",
           applicantName: userName,
           jobTitle: jobTitle || "",
+          applicationId: applicationId || "",
+          callPhase: "screening",
         },
       });
     } else {
@@ -193,6 +196,15 @@ const Agent = ({
 
       await vapi.start(interviewer, {
         variableValues: { questions: formattedQuestions },
+        metadata: {
+          userId: userId || "",
+          jobId: jobId || "",
+          employerId: employerId || "",
+          applicantName: userName,
+          jobTitle: jobTitle || "",
+          applicationId: applicationId || "",
+          callPhase: "interview",
+        },
       });
     }
   };
