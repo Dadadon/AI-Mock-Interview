@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/actions/auth.action";
 import { getJobById } from "@/lib/actions/jobs.action";
-import Agent from "@/components/Agent";
+import ApplyClient from "./ApplyClient";
 
 const ApplyPage = async ({ params }: RouteParams) => {
   const { jobId } = await params;
@@ -14,28 +14,16 @@ const ApplyPage = async ({ params }: RouteParams) => {
   if (!job) redirect("/marketplace");
 
   return (
-    <main className="flex flex-col items-center gap-8 max-w-3xl mx-auto">
-      <section className="text-center space-y-2 w-full">
-        <h1 className="text-3xl capitalize">{job.title}</h1>
-        <p className="text-light-400 text-sm">
-          {job.parish}, Jamaica &bull; {job.pay} &bull;{" "}
-          {job.type === "gig" ? "Short-term Gig" : "Full-time Job"}
-        </p>
-        {job.screeningQuestions && job.screeningQuestions.length > 0 && (
-          <p className="text-xs text-jamaica-gold">
-            {job.screeningQuestions.length} AI-tailored screening questions
-          </p>
-        )}
-      </section>
-
-      <Agent
-        userName={user.name}
+    <main className="flex flex-col items-center gap-8 py-8">
+      <ApplyClient
         userId={user.id}
-        type="job_apply"
-        scenario="job_screening"
+        userName={user.name}
         jobId={job.id}
         employerId={job.employerId}
         jobTitle={job.title}
+        jobParish={job.parish}
+        jobPay={job.pay}
+        jobType={job.type}
         screeningQuestions={job.screeningQuestions}
       />
     </main>

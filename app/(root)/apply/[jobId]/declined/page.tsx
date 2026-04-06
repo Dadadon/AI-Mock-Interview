@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { CheckCircle } from "lucide-react";
 
-const SuccessPage = async ({ params }: RouteParams) => {
+const DeclinedPage = async ({ params }: RouteParams) => {
   await params;
 
   return (
     <main className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
       <div className="flex flex-col items-center gap-4">
-        <CheckCircle className="w-16 h-16 text-jamaica-green" />
-        <h1 className="text-2xl font-bold">Interview Complete!</h1>
+        <div className="w-16 h-16 rounded-full bg-dark-300 flex items-center justify-center text-3xl">
+          🙏
+        </div>
+        <h1 className="text-2xl font-bold">Thank You for Applying</h1>
         <p className="text-light-400 max-w-md text-sm leading-relaxed">
-          Your screening and interview have been processed. The employer will
-          review your AI scores, transcript, and resume — and reach out if
-          you&apos;re a great fit.
+          After reviewing your screening, this role isn&apos;t the right fit right now.
+          Don&apos;t be discouraged — there are plenty of great opportunities on the marketplace.
         </p>
         <p className="text-xs text-jamaica-gold font-semibold">
-          Big up yourself — that took courage. 🇯🇲
+          Keep applying. Your next opportunity is out there.
         </p>
       </div>
 
@@ -37,4 +37,4 @@ const SuccessPage = async ({ params }: RouteParams) => {
   );
 };
 
-export default SuccessPage;
+export default DeclinedPage;
