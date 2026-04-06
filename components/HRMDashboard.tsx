@@ -9,7 +9,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import dayjs from "dayjs";
-import { Users, TrendingUp } from "lucide-react";
+import { Users, TrendingUp, FileText } from "lucide-react";
 
 import { db } from "@/firebase/client";
 
@@ -56,20 +56,40 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
   }, [employerId]);
 
   // ── Stats ───────────────────────────────────────────────────────────
+  const completedApps = applications.filter((a) => a.status === "complete");
+
   const avgScore =
-    applications.length > 0
+    completedApps.length > 0
       ? Math.round(
-          applications.reduce((sum, a) => sum + (a.score || 0), 0) /
-            applications.length
+          completedApps.reduce((sum, a) => sum + (a.interviewScore || 0), 0) /
+            completedApps.length
         )
       : 0;
 
   const topApplicant =
-    applications.length > 0
-      ? applications.reduce((best, a) =>
-          (a.score || 0) > (best.score || 0) ? a : best
+    completedApps.length > 0
+      ? completedApps.reduce((best, a) =>
+          (a.interviewScore || 0) > (best.interviewScore || 0) ? a : best
         )
       : null;
+
+  const statusLabel = (status: Application["status"]) => {
+    switch (status) {
+      case "pending": return "Pending";
+      case "screening_failed": return "Not Progressed";
+      case "interview_pending": return "Awaiting Interview";
+      case "complete": return "Complete";
+    }
+  };
+
+  const statusStyle = (status: Application["status"]) => {
+    switch (status) {
+      case "complete": return "bg-jamaica-green/20 text-jamaica-green";
+      case "interview_pending": return "bg-jamaica-gold/20 text-jamaica-gold";
+      case "screening_failed": return "bg-destructive-100/20 text-destructive-100";
+      default: return "bg-dark-300 text-light-400";
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -129,8 +149,8 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
               </p>
               <p className="text-xs text-light-400">
                 Top Score:{" "}
-                <span className={`font-bold ${getScoreColor(topApplicant?.score ?? 0)}`}>
-                  {topApplicant?.score ?? "—"}
+                <span className={`font-bold ${getScoreColor(topApplicant?.interviewScore ?? 0)}`}>
+                  {topApplicant?.interviewScore ?? "—"}
                 </span>
               </p>
             </div>
@@ -154,24 +174,13 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
             <table className="w-full">
               <thead>
                 <tr className="border-b border-jamaica-green/20 bg-jamaica-green/8 text-left">
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    Applicant
-                  </th>
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    Role
-                  </th>
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    AI Score
-                  </th>
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    Status
-                  </th>
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    Date
-                  </th>
-                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">
-                    Action
-                  </th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Applicant</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Role</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Screen</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Interview</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Status</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Date</th>
+                  <th className="px-5 py-3.5 text-xs font-bold text-light-400 uppercase tracking-widest">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,27 +189,46 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
                     key={app.id}
                     className="border-b border-jamaica-green/10 hover:bg-jamaica-green/5 transition-colors"
                   >
-                    <td className="px-5 py-4 font-semibold">{app.applicantName}</td>
-                    <td className="px-5 py-4 text-sm text-light-400 capitalize">
-                      {app.jobTitle}
+                    <td className="px-5 py-4 font-semibold">
+                      <div className="flex items-center gap-2">
+                        {app.resumeUrl && (
+                          <a
+                            href={app.resumeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="View resume"
+                            className="text-jamaica-gold hover:text-white transition-colors"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </a>
+                        )}
+                        {app.applicantName}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-light-400 capitalize">{app.jobTitle}</td>
+                    <td className="px-5 py-4">
+                      {app.screeningScore != null ? (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${getScoreBg(app.screeningScore)}`}>
+                          {app.screeningScore}
+                          <span className="text-xs font-normal opacity-70">/100</span>
+                        </span>
+                      ) : (
+                        <span className="text-light-600 text-sm">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${getScoreBg(app.score)}`}
-                      >
-                        {app.score}
-                        <span className="text-xs font-normal opacity-70">/100</span>
-                      </span>
+                      {app.interviewScore != null ? (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${getScoreBg(app.interviewScore)}`}>
+                          {app.interviewScore}
+                          <span className="text-xs font-normal opacity-70">/100</span>
+                        </span>
+                      ) : (
+                        <span className="text-light-600 text-sm">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
-                          app.status === "reviewed"
-                            ? "bg-jamaica-gold/20 text-jamaica-gold"
-                            : "bg-jamaica-green/20 text-jamaica-green"
-                        }`}
-                      >
-                        {app.status}
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${statusStyle(app.status)}`}>
+                        {statusLabel(app.status)}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-sm text-light-400">
@@ -209,11 +237,7 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
                     <td className="px-5 py-4">
                       <button
                         className="text-jamaica-green text-sm font-semibold hover:text-jamaica-gold transition-colors"
-                        onClick={() =>
-                          setSelectedApp(
-                            selectedApp?.id === app.id ? null : app
-                          )
-                        }
+                        onClick={() => setSelectedApp(selectedApp?.id === app.id ? null : app)}
                       >
                         {selectedApp?.id === app.id ? "Close" : "Review"}
                       </button>
@@ -235,11 +259,19 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
               <div>
                 <h3 className="font-bold text-xl">{selectedApp.applicantName}</h3>
                 <p className="text-light-400 text-sm mt-0.5">
-                  {selectedApp.jobTitle} &bull;{" "}
-                  <span className="font-bold">AI Score: </span>
-                  <span className={`font-extrabold ${getScoreColor(selectedApp.score)}`}>
-                    {selectedApp.score}/100
+                  {selectedApp.jobTitle} &bull; Screen:{" "}
+                  <span className={`font-bold ${getScoreColor(selectedApp.screeningScore ?? 0)}`}>
+                    {selectedApp.screeningScore ?? "—"}
                   </span>
+                  {selectedApp.interviewScore != null && (
+                    <>
+                      {" "}· Interview:{" "}
+                      <span className={`font-bold ${getScoreColor(selectedApp.interviewScore)}`}>
+                        {selectedApp.interviewScore}
+                      </span>
+                    </>
+                  )}
+                  <span className="text-light-600">/100</span>
                 </p>
               </div>
               <button
@@ -253,29 +285,53 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
             {/* Gold divider */}
             <div className="h-px bg-gradient-to-r from-jamaica-gold/50 via-jamaica-green/30 to-transparent" />
 
-            {/* AI Summary */}
-            {selectedApp.summary && (
+            {/* Screening summary */}
+            {selectedApp.screeningSummary && (
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
-                  AI Summary
+                  Screening Summary
                 </h4>
-                <p className="text-sm leading-relaxed text-light-400">
-                  {selectedApp.summary}
-                </p>
+                <p className="text-sm leading-relaxed text-light-400">{selectedApp.screeningSummary}</p>
               </div>
             )}
 
-            {/* Transcript */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
-                Call Transcript
-              </h4>
-              <div className="bg-dark-300/60 border border-jamaica-green/15 rounded-2xl p-4 max-h-64 overflow-y-auto">
-                <p className="text-sm whitespace-pre-wrap leading-relaxed text-light-400">
-                  {selectedApp.transcript || "No transcript available."}
-                </p>
+            {/* Interview summary */}
+            {selectedApp.interviewSummary && (
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
+                  Interview Summary
+                </h4>
+                <p className="text-sm leading-relaxed text-light-400">{selectedApp.interviewSummary}</p>
               </div>
-            </div>
+            )}
+
+            {/* Screening transcript */}
+            {selectedApp.screeningTranscript && (
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
+                  Screening Transcript
+                </h4>
+                <div className="bg-dark-300/60 border border-jamaica-green/15 rounded-2xl p-4 max-h-48 overflow-y-auto">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-light-400">
+                    {selectedApp.screeningTranscript}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Interview transcript */}
+            {selectedApp.interviewTranscript && (
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
+                  Interview Transcript
+                </h4>
+                <div className="bg-dark-300/60 border border-jamaica-green/15 rounded-2xl p-4 max-h-64 overflow-y-auto">
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-light-400">
+                    {selectedApp.interviewTranscript}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
