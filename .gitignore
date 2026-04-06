@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Vapi workflow config (contains API keys)
+neat-gigz-—-job-screening*.json
