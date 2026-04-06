@@ -11,8 +11,18 @@ import { db } from "@/firebase/admin";
  * document so every applicant is screened with criteria tailored to that
  * specific role, rather than a generic question set.
  */
-export async function createJob(params: CreateJobParams) {
+export async function createJob(params: CreateJobParams & { screeningQuestions?: string[] }) {
   try {
+    // ── Use provided questions or generate via AI ─────────────────────
+    if (params.screeningQuestions && params.screeningQuestions.length > 0) {
+      const jobRef = db.collection("jobs").doc();
+      await jobRef.set({
+        ...params,
+        createdAt: new Date().toISOString(),
+      });
+      return { success: true, jobId: jobRef.id };
+    }
+
     // ── Generate AI screening questions ──────────────────────────────
     const { text: rawQuestions } = await generateText({
       model: google("gemini-2.0-flash-001"),

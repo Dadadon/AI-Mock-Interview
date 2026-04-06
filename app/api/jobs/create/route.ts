@@ -7,7 +7,7 @@ import { createJob } from "@/lib/actions/jobs.action";
  */
 export async function POST(request: Request) {
   const body = await request.json();
-  const { employerId, title, description, type, parish, pay, category, criteria } =
+  const { employerId, title, description, type, parish, pay, category, criteria, screeningQuestions } =
     body;
 
   if (!employerId || !title || !type) {
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     pay: pay || "Negotiable",
     category: category || "General",
     criteria: Array.isArray(criteria) ? criteria : [],
+    screeningQuestions: Array.isArray(screeningQuestions) ? screeningQuestions : undefined,
   });
 
   if (result.success) {
