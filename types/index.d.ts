@@ -123,7 +123,9 @@ interface Job {
   pay: string;
   category: string;
   criteria: string[];
-  /** AI-generated screening questions unique to this listing */
+  /** Binary yes/no eligibility requirements shown as a form gate before the interview */
+  requirements?: string[];
+  /** AI-generated interview questions unique to this listing */
   screeningQuestions?: string[];
   createdAt: string;
 }
@@ -135,8 +137,8 @@ interface Application {
   employerId: string;
   applicantName: string;
   jobTitle: string;
-  /** State machine: pending → screening_failed | interview_pending → complete */
-  status: "pending" | "screening_failed" | "interview_pending" | "complete";
+  /** State machine: interview_pending → complete | ineligible (failed form gate) */
+  status: "interview_pending" | "complete" | "ineligible";
   // Resume
   resumeUrl?: string;
   resumeText?: string;
@@ -163,6 +165,7 @@ interface CreateJobParams {
   pay: string;
   category: string;
   criteria: string[];
+  requirements?: string[];
 }
 
 interface JobCardProps {
