@@ -24,6 +24,7 @@ const ApplyPage = async ({ params }: RouteParams) => {
         jobParish={job.parish}
         jobPay={job.pay}
         jobType={job.type}
+        requirements={job.requirements}
         screeningQuestions={job.screeningQuestions}
       />
     </main>
