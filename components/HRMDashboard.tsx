@@ -75,10 +75,9 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
 
   const statusLabel = (status: Application["status"]) => {
     switch (status) {
-      case "pending": return "Pending";
-      case "screening_failed": return "Not Progressed";
-      case "interview_pending": return "Awaiting Interview";
+      case "interview_pending": return "Awaiting Score";
       case "complete": return "Complete";
+      case "ineligible": return "Ineligible";
     }
   };
 
@@ -86,7 +85,7 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
     switch (status) {
       case "complete": return "bg-jamaica-green/20 text-jamaica-green";
       case "interview_pending": return "bg-jamaica-gold/20 text-jamaica-gold";
-      case "screening_failed": return "bg-destructive-100/20 text-destructive-100";
+      case "ineligible": return "bg-destructive-100/20 text-destructive-100";
       default: return "bg-dark-300 text-light-400";
     }
   };

@@ -29,16 +29,16 @@ const ProcessingPage = () => {
         if (!res.ok) return;
         const data = await res.json();
 
-        if (data.status === "interview_pending") {
+        if (data.status === "complete") {
           clearInterval(intervalRef.current!);
           clearTimeout(timeoutRef.current!);
-          router.replace(`/apply/${jobId}/interview?applicationId=${applicationId}`);
-        } else if (data.status === "screening_failed") {
+          router.replace(`/apply/${jobId}/success`);
+        } else if (data.status === "ineligible") {
           clearInterval(intervalRef.current!);
           clearTimeout(timeoutRef.current!);
           router.replace(`/apply/${jobId}/declined`);
         }
-        // status "pending" → keep polling
+        // status "interview_pending" → keep polling
       } catch (err) {
         console.error("[processing] poll error:", err);
       }
@@ -69,9 +69,9 @@ const ProcessingPage = () => {
             🎙️
           </span>
         </div>
-        <h1 className="text-2xl font-bold">Scoring Your Screening</h1>
+        <h1 className="text-2xl font-bold">Scoring Your Interview</h1>
         <p className="text-light-400 max-w-sm text-sm">
-          Our AI is reviewing your call. This usually takes less than 30 seconds.
+          Our AI is reviewing your interview. This usually takes less than 30 seconds.
         </p>
         <div className="flex gap-1.5 mt-2">
           <span className="w-2 h-2 rounded-full bg-jamaica-green animate-bounce [animation-delay:0ms]" />
