@@ -26,6 +26,7 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [criteriaInput, setCriteriaInput] = useState("");
+  const [requirementInput, setRequirementInput] = useState("");
   const [questions, setQuestions] = useState<string[]>([]);
 
   const [form, setForm] = useState({
@@ -36,6 +37,7 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
     pay: "",
     category: "Customer Service",
     criteria: [] as string[],
+    requirements: [] as string[],
   });
 
   // ── Criteria helpers ─────────────────────────────────────────────────
@@ -49,6 +51,18 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
 
   const removeCriteria = (item: string) =>
     setForm((p) => ({ ...p, criteria: p.criteria.filter((c) => c !== item) }));
+
+  // ── Requirements helpers ──────────────────────────────────────────────
+  const addRequirement = () => {
+    const trimmed = requirementInput.trim();
+    if (trimmed && !form.requirements.includes(trimmed)) {
+      setForm((p) => ({ ...p, requirements: [...p.requirements, trimmed] }));
+      setRequirementInput("");
+    }
+  };
+
+  const removeRequirement = (item: string) =>
+    setForm((p) => ({ ...p, requirements: p.requirements.filter((r) => r !== item) }));
 
   // ── Step 1 → generate questions for review ───────────────────────────
   const handleGeneratePreview = async (e: React.FormEvent) => {
@@ -126,7 +140,7 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
       const res = await fetch("/api/jobs/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, employerId, screeningQuestions: finalQuestions }),
+        body: JSON.stringify({ ...form, employerId, screeningQuestions: finalQuestions, requirements: form.requirements }),
       });
 
       const data = await res.json();
@@ -227,16 +241,52 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
             </div>
           </div>
 
-          {/* Screening Criteria */}
+          {/* Binary Requirements (eligibility gate) */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Screening Criteria</label>
+            <label className="text-sm font-medium">Eligibility Requirements</label>
             <p className="text-xs text-light-400">
-              Requirements the AI will use to generate your screening questions.
+              Hard must-haves shown as Yes / No questions before the interview.
+              Candidates who answer No to any requirement are declined instantly — no Vapi call triggered.
             </p>
             <div className="flex gap-2">
               <input
                 className="flex-1 bg-dark-300 border border-input rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary-200"
-                placeholder="e.g. Must be available on weekends"
+                placeholder="e.g. Do you have a valid Jamaican Driver's License?"
+                value={requirementInput}
+                onChange={(e) => setRequirementInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addRequirement())}
+              />
+              <button type="button" onClick={addRequirement} className="btn-primary px-4 py-2 text-sm rounded-lg">
+                Add
+              </button>
+            </div>
+            {form.requirements.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2">
+                {form.requirements.map((r) => (
+                  <div key={r} className="flex items-center justify-between bg-dark-300 border border-jamaica-gold/20 rounded-lg px-3 py-2">
+                    <span className="text-sm">{r}</span>
+                    <div className="flex items-center gap-3 shrink-0 ml-3">
+                      <span className="text-xs text-light-400 font-medium">Yes / No</span>
+                      <button type="button" onClick={() => removeRequirement(r)} className="text-light-600 hover:text-destructive-100 transition-colors">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* AI Criteria (used to generate interview questions) */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Interview Criteria</label>
+            <p className="text-xs text-light-400">
+              Skills and traits the AI will use to generate your interview questions.
+            </p>
+            <div className="flex gap-2">
+              <input
+                className="flex-1 bg-dark-300 border border-input rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary-200"
+                placeholder="e.g. Must have experience with Excel"
                 value={criteriaInput}
                 onChange={(e) => setCriteriaInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCriteria())}
