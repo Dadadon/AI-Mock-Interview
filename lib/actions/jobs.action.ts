@@ -156,7 +156,7 @@ export async function createApplication(params: {
     const ref = db.collection("applications").doc();
     await ref.set({
       ...params,
-      status: "pending",
+      status: "interview_pending",
       createdAt: new Date().toISOString(),
     });
     return { success: true, applicationId: ref.id };
