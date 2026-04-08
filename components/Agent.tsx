@@ -129,6 +129,9 @@ const Agent = ({
         router.push("/");
       } else if (type === "job_apply") {
         router.push(`/apply/${jobId}/processing?applicationId=${applicationId ?? ""}`);
+      } else if (applicationId && jobId) {
+        // Job interview — wait for webhook to score before showing result
+        router.push(`/apply/${jobId}/processing?applicationId=${applicationId}`);
       } else {
         handleGenerateFeedback(messages);
       }
