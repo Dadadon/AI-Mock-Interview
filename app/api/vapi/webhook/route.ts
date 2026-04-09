@@ -82,14 +82,22 @@ ${transcript || "No transcript available."}
 
 ${JAMAICAN_CONTEXT}
 
-Score the candidate 0–100 across:
+Score the candidate 0–100 across these five categories:
 - Communication Skills (clarity of thought — not accent)
 - Technical Knowledge (depth of relevant skills and experience)
 - Problem Solving (ability to think through challenges)
 - Cultural Fit (alignment with Jamaican professional culture)
 - Confidence and Clarity (composed, engaged, clear)
 
-Provide detailed, constructive feedback. This is the final assessment sent to the employer.`,
+CRITICAL REQUIREMENT — TRANSCRIPT EVIDENCE:
+Every piece of feedback MUST be grounded in specific moments from the transcript above.
+- category comment: cite a direct quote or paraphrase from the candidate's actual words that justifies the score. Example: "When asked about X, the candidate said '...' which showed..."
+- strengths: each item must reference a specific answer or moment — not generic praise. Example: "Clearly articulated their experience with X when answering the question about Y."
+- areasForImprovement: each item must reference a specific gap or vague answer from the call. Example: "When asked about Z, the response lacked specifics — mentioned only '...' without concrete detail."
+- finalAssessment: a 2–3 sentence narrative that references the standout moments (positive and negative) from the conversation by name.
+
+Do NOT write generic feedback that could apply to any candidate. Every observation must be traceable to something said in this specific call.
+This is the final assessment sent to the employer — make it evidence-based and actionable.`,
       system: "You are a professional recruiter evaluating voice interviews for Neat Gigz, a Jamaican hiring platform.",
     });
 
