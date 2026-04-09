@@ -197,18 +197,34 @@ const Agent = ({
       const formattedQuestions =
         questions?.map((q) => `- ${q}`).join("\n") ?? "";
 
-      await vapi.start(interviewer, {
-        variableValues: { questions: formattedQuestions },
-        metadata: {
-          userId: userId || "",
-          jobId: jobId || "",
-          employerId: employerId || "",
-          applicantName: userName,
-          jobTitle: jobTitle || "",
-          applicationId: applicationId || "",
-          callPhase: "interview",
+      const serverUrl = process.env.NEXT_PUBLIC_VAPI_SERVER_URL;
+
+      await vapi.start(
+        {
+          ...interviewer,
+          ...(serverUrl ? { server: { url: `${serverUrl}/api/vapi/webhook` } } : {}),
         },
-      });
+        {
+          variableValues: {
+            questions: formattedQuestions,
+            userId: userId || "",
+            jobId: jobId || "",
+            employerId: employerId || "",
+            username: userName,
+            jobTitle: jobTitle || "",
+            applicationId: applicationId || "",
+          },
+          metadata: {
+            userId: userId || "",
+            jobId: jobId || "",
+            employerId: employerId || "",
+            applicantName: userName,
+            jobTitle: jobTitle || "",
+            applicationId: applicationId || "",
+            callPhase: "interview",
+          },
+        }
+      );
     }
   };
 

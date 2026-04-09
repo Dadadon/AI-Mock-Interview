@@ -7,8 +7,9 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { storage } from "@/firebase/client";
 import { createApplication } from "@/lib/actions/jobs.action";
+import { updateUserResume } from "@/lib/actions/auth.action";
 
-type Phase = "eligibility" | "upload" | "done";
+type Phase = "eligibility" | "resume_choice" | "upload" | "done";
 
 interface ApplyClientProps {
   userId: string;
@@ -19,8 +20,11 @@ interface ApplyClientProps {
   jobParish: string;
   jobPay: string;
   jobType: "gig" | "job";
-  requirements?: string[];
+  requirements?: { text: string; required: boolean }[];
   screeningQuestions?: string[];
+  profileResumeUrl?: string;
+  profileResumeText?: string;
+  profileResumeFileName?: string;
 }
 
 const ApplyClient = ({
@@ -32,16 +36,23 @@ const ApplyClient = ({
   jobParish,
   jobPay,
   jobType,
-  requirements = [],
+  requirements = [] as { text: string; required: boolean }[],
   screeningQuestions,
+  profileResumeUrl,
+  profileResumeText,
+  profileResumeFileName,
 }: ApplyClientProps) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [phase, setPhase] = useState<Phase>(requirements.length > 0 ? "eligibility" : "upload");
+  const hasProfileResume = !!profileResumeUrl && !!profileResumeText;
+  const initialUploadPhase = hasProfileResume ? "resume_choice" : "upload";
+
+  const [phase, setPhase] = useState<Phase>(requirements.length > 0 ? "eligibility" : initialUploadPhase);
   const [answers, setAnswers] = useState<Record<number, boolean | null>>(
     Object.fromEntries(requirements.map((_, i) => [i, null]))
   );
+  const [eligibilityScore, setEligibilityScore] = useState<number>(100);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -54,12 +65,21 @@ const ApplyClient = ({
 
   // ── Phase 0: Eligibility form ─────────────────────────────────────────
   const handleEligibilitySubmit = () => {
-    const failed = requirements.some((_, i) => answers[i] !== true);
-    if (failed) {
+    // Decline only if any MUST HAVE is answered No
+    const failedRequired = requirements.some((r, i) => r.required && answers[i] === false);
+    if (failedRequired) {
       router.push(`/apply/${jobId}/declined`);
       return;
     }
-    setPhase("upload");
+
+    // Calculate eligibility score: percentage of all requirements answered Yes
+    const yesCount = requirements.filter((_, i) => answers[i] === true).length;
+    const eligibilityScore = requirements.length > 0
+      ? Math.round((yesCount / requirements.length) * 100)
+      : 100;
+
+    setEligibilityScore(eligibilityScore);
+    setPhase(hasProfileResume ? "resume_choice" : "upload");
   };
 
   if (phase === "eligibility") {
@@ -85,7 +105,16 @@ const ApplyClient = ({
             <div className="space-y-4">
               {requirements.map((req, i) => (
                 <div key={i} className="space-y-2">
-                  <p className="text-sm font-medium">{req}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium flex-1">{req.text}</p>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                      req.required
+                        ? "bg-destructive-100/15 text-destructive-100"
+                        : "bg-jamaica-green/15 text-jamaica-green"
+                    }`}>
+                      {req.required ? "Must Have" : "Optional"}
+                    </span>
+                  </div>
                   <div className="flex gap-3">
                     <button
                       type="button"
@@ -134,7 +163,65 @@ const ApplyClient = ({
     );
   }
 
-  // ── Phase 1: Resume upload ────────────────────────────────────────────
+  // ── Phase 1a: Resume on file — use or replace ────────────────────────
+  if (phase === "resume_choice") {
+    return (
+      <div className="w-full max-w-lg mx-auto space-y-6">
+        <div className="text-center space-y-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-jamaica-green">
+            Eligibility confirmed
+          </p>
+          <h1 className="text-3xl capitalize">{jobTitle}</h1>
+          {jobMeta}
+        </div>
+
+        <div className="card-border">
+          <div className="card p-6 space-y-5 rounded-3xl">
+            <div>
+              <h2 className="font-bold text-lg">Resume on File</h2>
+              <p className="text-sm text-light-400 mt-1">
+                Use your saved resume or upload a new one.
+              </p>
+            </div>
+
+            {/* Profile resume card */}
+            <div className="flex items-center gap-4 bg-dark-300 border border-jamaica-green/20 rounded-2xl px-4 py-3">
+              <span className="text-2xl">📄</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">
+                  {profileResumeFileName || "Resume on file"}
+                </p>
+                <p className="text-xs text-light-400">Saved to your profile</p>
+              </div>
+            </div>
+
+            <button
+              onClick={handleUseProfileResume}
+              disabled={uploading}
+              className="btn-primary w-full py-3 rounded-full font-bold disabled:opacity-50"
+            >
+              {uploading ? "Starting interview..." : "Use This Resume"}
+            </button>
+
+            <div className="relative flex items-center gap-3">
+              <div className="flex-1 h-px bg-input" />
+              <span className="text-xs text-light-600">or</span>
+              <div className="flex-1 h-px bg-input" />
+            </div>
+
+            <button
+              onClick={() => setPhase("upload")}
+              className="w-full py-3 rounded-full font-bold text-sm border border-jamaica-green/30 text-light-400 hover:border-jamaica-green hover:text-white transition-colors"
+            >
+              Upload a New Resume
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Phase 1b: Resume upload ───────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -151,6 +238,31 @@ const ApplyClient = ({
     setFile(selected);
   };
 
+  // Use profile resume directly
+  const handleUseProfileResume = async () => {
+    setUploading(true);
+    try {
+      const { success, applicationId } = await createApplication({
+        userId, jobId, employerId, applicantName: userName, jobTitle,
+        resumeUrl: profileResumeUrl,
+        resumeText: profileResumeText,
+        eligibilityScore,
+      });
+      if (!success || !applicationId) {
+        toast.error("Failed to start your application. Please try again.");
+        return;
+      }
+      setPhase("done");
+      router.push(`/apply/${jobId}/interview?applicationId=${applicationId}`);
+    } catch (err) {
+      console.error("[ApplyClient]", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Upload new resume, save to profile, then create application
   const handleStartApplication = async () => {
     if (!file) {
       toast.error("Please upload your resume first.");
@@ -158,12 +270,11 @@ const ApplyClient = ({
     }
     setUploading(true);
     try {
-      // 1. Parse resume with Gemini
+      // 1. Parse resume
       const formData = new FormData();
       formData.append("resume", file);
       const parseRes = await fetch("/api/resume/parse", { method: "POST", body: formData });
       const parseData = await parseRes.json();
-
       const resumeText: string = parseData.resumeData?.rawText || parseData.resumeData?.summary || "";
 
       // 2. Upload to Firebase Storage
@@ -176,15 +287,23 @@ const ApplyClient = ({
         console.warn("[ApplyClient] Storage upload failed:", err);
       }
 
-      // 3. Create application doc — interview_pending from the start
+      // 3. Save to user profile so future applications can reuse it
+      if (resumeUrl) {
+        const rd = parseData.resumeData || {};
+        await updateUserResume({
+          userId, resumeUrl, resumeText, resumeFileName: file.name,
+          resumeSummary: rd.summary || "",
+          resumeSkills: Array.isArray(rd.skills) ? rd.skills : [],
+          resumeExperienceSummary: rd.experienceSummary || "",
+          resumeEducation: rd.education || "",
+          resumeYearsExperience: rd.yearsExperience ? String(rd.yearsExperience) : "",
+        });
+      }
+
+      // 4. Create application doc
       const { success, applicationId } = await createApplication({
-        userId,
-        jobId,
-        employerId,
-        applicantName: userName,
-        jobTitle,
-        resumeUrl,
-        resumeText,
+        userId, jobId, employerId, applicantName: userName, jobTitle,
+        resumeUrl, resumeText, eligibilityScore,
       });
 
       if (!success || !applicationId) {
@@ -192,7 +311,6 @@ const ApplyClient = ({
         return;
       }
 
-      // 4. Navigate to interview page
       setPhase("done");
       router.push(`/apply/${jobId}/interview?applicationId=${applicationId}`);
     } catch (err) {

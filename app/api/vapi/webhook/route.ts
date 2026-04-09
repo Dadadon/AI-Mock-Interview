@@ -1,4 +1,4 @@
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 
 import { db } from "@/firebase/admin";
@@ -34,12 +34,12 @@ export async function POST(request: Request) {
   const meta = call?.metadata || {};
   const vars = call?.assistantOverrides?.variableValues || {};
 
-  const userId: string = meta.userId || vars.userid || "";
+  const userId: string = meta.userId || vars.userId || vars.userid || "";
   const jobId: string = meta.jobId || vars.jobId || "";
   const employerId: string = meta.employerId || vars.employerId || "";
   const applicantName: string = meta.applicantName || vars.username || "Unknown Applicant";
   const jobTitle: string = meta.jobTitle || vars.jobTitle || "Unknown Role";
-  const applicationId: string = meta.applicationId || "";
+  const applicationId: string = meta.applicationId || vars.applicationId || "";
 
   if (!userId || !jobId) {
     console.error("[vapi/webhook] Missing userId or jobId:", { meta, vars });
@@ -47,6 +47,28 @@ export async function POST(request: Request) {
   }
 
   try {
+    // ── Guard: require meaningful candidate participation ──────────────────
+    const candidateLines = (transcript || "")
+      .split("\n")
+      .filter((l) => l.trim().toLowerCase().startsWith("user:") || l.trim().toLowerCase().startsWith("candidate:"));
+
+    const candidateWordCount = candidateLines
+      .join(" ")
+      .replace(/^(user|candidate):\s*/gim, "")
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    if (candidateLines.length === 0 || candidateWordCount < 20) {
+      console.warn(`[vapi/webhook] Insufficient candidate speech (${candidateWordCount} words) — marking incomplete`);
+      if (applicationId) {
+        await db.collection("applications").doc(applicationId).update({
+          status: "interview_incomplete",
+          updatedAt: new Date().toISOString(),
+        });
+      }
+      return Response.json({ success: true, skipped: "no candidate speech" }, { status: 200 });
+    }
+
     // ── Score the interview ────────────────────────────────────────────────
     const { object } = await generateObject({
       model: google("gemini-2.0-flash-001", { structuredOutputs: false }),
@@ -92,44 +114,6 @@ Provide detailed, constructive feedback. This is the final assessment sent to th
         createdAt: new Date().toISOString(),
       });
       console.warn("[vapi/webhook] No applicationId in metadata — created new doc");
-    }
-
-    // ── Generate personalised interview questions for future use ──────────
-    // (stored for reference; the interview already happened)
-    if (applicationId) {
-      try {
-        const appSnap = await db.collection("applications").doc(applicationId).get();
-        const resumeText: string = appSnap.data()?.resumeText || "";
-
-        if (resumeText) {
-          const jobSnap = await db.collection("jobs").doc(jobId).get();
-          const jobData = jobSnap.data() || {};
-
-          const { text: rawQuestions } = await generateText({
-            model: google("gemini-2.0-flash-001"),
-            prompt: `Based on this candidate's resume and the ${jobTitle} role at Neat Gigz, generate 6 tailored follow-up or debrief questions an employer could ask in a second-round interview.
-
-Job Description: ${jobData.description || "N/A"}
-Resume Summary: ${resumeText.substring(0, 1000)}
-
-Return ONLY a valid JSON array of 6 strings.`,
-          });
-
-          let followUpQuestions: string[] = [];
-          try {
-            const cleaned = rawQuestions.trim().replace(/^```json?\s*/i, "").replace(/```\s*$/, "").trim();
-            followUpQuestions = JSON.parse(cleaned);
-          } catch {
-            // Non-fatal — skip
-          }
-
-          if (followUpQuestions.length > 0) {
-            await db.collection("applications").doc(applicationId).update({ followUpQuestions });
-          }
-        }
-      } catch (err) {
-        console.error("[vapi/webhook] Follow-up question generation failed:", err);
-      }
     }
 
     return Response.json({ success: true, score: object.totalScore }, { status: 200 });

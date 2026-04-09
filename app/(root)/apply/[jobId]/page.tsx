@@ -26,6 +26,9 @@ const ApplyPage = async ({ params }: RouteParams) => {
         jobType={job.type}
         requirements={job.requirements}
         screeningQuestions={job.screeningQuestions}
+        profileResumeUrl={user.resumeUrl}
+        profileResumeText={user.resumeText}
+        profileResumeFileName={user.resumeFileName}
       />
     </main>
   );

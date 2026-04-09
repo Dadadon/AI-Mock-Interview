@@ -37,6 +37,10 @@ const ProcessingPage = () => {
           clearInterval(intervalRef.current!);
           clearTimeout(timeoutRef.current!);
           router.replace(`/apply/${jobId}/declined`);
+        } else if (data.status === "interview_incomplete") {
+          clearInterval(intervalRef.current!);
+          clearTimeout(timeoutRef.current!);
+          router.replace(`/apply/${jobId}/interview?applicationId=${applicationId}&retry=true`);
         }
         // status "interview_pending" → keep polling
       } catch (err) {

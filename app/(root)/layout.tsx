@@ -25,6 +25,12 @@ const Layout = async ({ children }: { children: ReactNode }) => {
             Marketplace
           </Link>
           <Link
+            href="/my-applications"
+            className="text-light-400 hover:text-light-100 transition-colors"
+          >
+            My Applications
+          </Link>
+          <Link
             href="/dashboard/hrm"
             className="text-light-400 hover:text-light-100 transition-colors"
           >
@@ -35,6 +41,12 @@ const Layout = async ({ children }: { children: ReactNode }) => {
             className="text-light-400 hover:text-light-100 transition-colors"
           >
             Post a Job
+          </Link>
+          <Link
+            href="/profile"
+            className="text-light-400 hover:text-light-100 transition-colors"
+          >
+            Profile
           </Link>
         </div>
       </nav>

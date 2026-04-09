@@ -37,7 +37,7 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
     pay: "",
     category: "Customer Service",
     criteria: [] as string[],
-    requirements: [] as string[],
+    requirements: [] as { text: string; required: boolean }[],
   });
 
   // ── Criteria helpers ─────────────────────────────────────────────────
@@ -55,14 +55,22 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
   // ── Requirements helpers ──────────────────────────────────────────────
   const addRequirement = () => {
     const trimmed = requirementInput.trim();
-    if (trimmed && !form.requirements.includes(trimmed)) {
-      setForm((p) => ({ ...p, requirements: [...p.requirements, trimmed] }));
+    if (trimmed && !form.requirements.find((r) => r.text === trimmed)) {
+      setForm((p) => ({ ...p, requirements: [...p.requirements, { text: trimmed, required: true }] }));
       setRequirementInput("");
     }
   };
 
-  const removeRequirement = (item: string) =>
-    setForm((p) => ({ ...p, requirements: p.requirements.filter((r) => r !== item) }));
+  const removeRequirement = (index: number) =>
+    setForm((p) => ({ ...p, requirements: p.requirements.filter((_, i) => i !== index) }));
+
+  const toggleRequirement = (index: number) =>
+    setForm((p) => ({
+      ...p,
+      requirements: p.requirements.map((r, i) =>
+        i === index ? { ...r, required: !r.required } : r
+      ),
+    }));
 
   // ── Step 1 → generate questions for review ───────────────────────────
   const handleGeneratePreview = async (e: React.FormEvent) => {
@@ -262,15 +270,23 @@ const CreateJobForm = ({ employerId }: { employerId: string }) => {
             </div>
             {form.requirements.length > 0 && (
               <div className="flex flex-col gap-2 mt-2">
-                {form.requirements.map((r) => (
-                  <div key={r} className="flex items-center justify-between bg-dark-300 border border-jamaica-gold/20 rounded-lg px-3 py-2">
-                    <span className="text-sm">{r}</span>
-                    <div className="flex items-center gap-3 shrink-0 ml-3">
-                      <span className="text-xs text-light-400 font-medium">Yes / No</span>
-                      <button type="button" onClick={() => removeRequirement(r)} className="text-light-600 hover:text-destructive-100 transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                {form.requirements.map((r, i) => (
+                  <div key={i} className="flex items-center justify-between bg-dark-300 border border-jamaica-gold/20 rounded-lg px-3 py-2 gap-3">
+                    <span className="text-sm flex-1">{r.text}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleRequirement(i)}
+                      className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                        r.required
+                          ? "bg-destructive-100/15 text-destructive-100 border-destructive-100/40"
+                          : "bg-jamaica-green/15 text-jamaica-green border-jamaica-green/40"
+                      }`}
+                    >
+                      {r.required ? "Must Have" : "Optional"}
+                    </button>
+                    <button type="button" onClick={() => removeRequirement(i)} className="text-light-600 hover:text-destructive-100 transition-colors shrink-0">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))}
               </div>

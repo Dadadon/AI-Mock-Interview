@@ -39,6 +39,16 @@ interface User {
   email: string;
   id: string;
   role?: "applicant" | "employer";
+  photoUrl?: string;
+  resumeUrl?: string;
+  resumeText?: string;
+  resumeFileName?: string;
+  // Parsed resume fields stored at upload time
+  resumeSummary?: string;
+  resumeSkills?: string[];
+  resumeExperienceSummary?: string;
+  resumeEducation?: string;
+  resumeYearsExperience?: string;
 }
 
 interface InterviewCardProps {
@@ -124,7 +134,7 @@ interface Job {
   category: string;
   criteria: string[];
   /** Binary yes/no eligibility requirements shown as a form gate before the interview */
-  requirements?: string[];
+  requirements?: { text: string; required: boolean }[];
   /** AI-generated interview questions unique to this listing */
   screeningQuestions?: string[];
   createdAt: string;
@@ -137,21 +147,29 @@ interface Application {
   employerId: string;
   applicantName: string;
   jobTitle: string;
-  /** State machine: interview_pending → complete | ineligible (failed form gate) */
-  status: "interview_pending" | "complete" | "ineligible";
+  /** State machine: interview_pending → complete | ineligible | interview_incomplete */
+  status: "interview_pending" | "complete" | "ineligible" | "interview_incomplete";
   // Resume
   resumeUrl?: string;
   resumeText?: string;
-  // Screening phase
-  screeningScore?: number;
-  screeningPassed?: boolean;
-  screeningTranscript?: string;
-  screeningSummary?: string;
-  // Interview phase
+  // Eligibility phase
+  eligibilityScore?: number;
+  // Interview phase (AI voice)
   interviewQuestions?: string[];
   interviewScore?: number;
   interviewTranscript?: string;
   interviewSummary?: string;
+  interviewFeedback?: {
+    totalScore: number;
+    categoryScores: {
+      name: string;
+      score: number;
+      comment: string;
+    }[];
+    strengths: string[];
+    areasForImprovement: string[];
+    finalAssessment: string;
+  };
   createdAt: string;
   updatedAt?: string;
 }
@@ -165,7 +183,7 @@ interface CreateJobParams {
   pay: string;
   category: string;
   criteria: string[];
-  requirements?: string[];
+  requirements?: { text: string; required: boolean }[];
 }
 
 interface JobCardProps {

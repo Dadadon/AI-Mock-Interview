@@ -105,6 +105,21 @@ export async function getJobById(jobId: string): Promise<Job | null> {
   return { id: doc.id, ...doc.data() } as Job;
 }
 
+export async function getApplicationsByUserId(
+  userId: string
+): Promise<Application[]> {
+  const apps = await db
+    .collection("applications")
+    .where("userId", "==", userId)
+    .orderBy("createdAt", "desc")
+    .get();
+
+  return apps.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Application[];
+}
+
 export async function getApplicationsByEmployerId(
   employerId: string
 ): Promise<Application[]> {
@@ -151,14 +166,74 @@ export async function createApplication(params: {
   jobTitle: string;
   resumeUrl?: string;
   resumeText?: string;
+  eligibilityScore?: number;
 }): Promise<{ success: boolean; applicationId?: string }> {
   try {
+    // ── Fetch job for employer questions + context ─────────────────────
+    const jobSnap = await db.collection("jobs").doc(params.jobId).get();
+    const jobData = jobSnap.data() || {};
+    const employerQuestions: string[] = jobData.screeningQuestions || [];
+
+    // ── Generate resume-tailored additions using Gemini ───────────────
+    let interviewQuestions: string[] = [...employerQuestions];
+
+    try {
+      const resumeText = params.resumeText || "";
+      const { text: rawAdditions } = await generateText({
+        model: google("gemini-2.0-flash-001"),
+        prompt: `You are preparing personalised voice interview questions for a candidate applying to a role on Neat Gigz, a Jamaican hiring platform.
+
+Job Title: ${params.jobTitle}
+Job Description: ${jobData.description || "N/A"}
+Job Category: ${jobData.category || "General"}
+Employer Criteria: ${Array.isArray(jobData.criteria) ? jobData.criteria.join("; ") : "N/A"}
+
+Candidate Resume:
+${resumeText || "No resume text available."}
+
+The employer has already set these interview questions that MUST be asked:
+${employerQuestions.length > 0 ? employerQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n") : "None"}
+
+Generate ${employerQuestions.length > 0 ? "2-3" : "5-6"} ADDITIONAL questions that are personalised to this specific candidate's resume and the role.
+- Deep-dive into specific experience, skills, or gaps visible in their resume
+- Situational or behavioural questions relevant to the job
+- Do NOT repeat or rephrase the employer's existing questions above
+- Each answerable by voice in 60-90 seconds
+- Warm professional tone for the Jamaican workforce
+- Do NOT use "/", "*", "#", or special characters
+- Return ONLY a valid JSON array of strings, nothing else`,
+      });
+
+      const cleaned = rawAdditions.trim()
+        .replace(/^```json?\s*/i, "")
+        .replace(/```\s*$/, "")
+        .trim();
+
+      let additions: string[] = [];
+      try {
+        additions = JSON.parse(cleaned);
+      } catch {
+        const matches = rawAdditions.match(/"([^"]+\?)"/g);
+        if (matches) {
+          additions = matches.map((m) => m.replace(/^"|"$/g, ""));
+        }
+      }
+
+      // Employer questions first, personalised additions after
+      interviewQuestions = [...employerQuestions, ...additions];
+    } catch (genErr) {
+      console.error("[createApplication] Question generation failed, using employer questions only:", genErr);
+    }
+
+    // ── Persist application doc ───────────────────────────────────────
     const ref = db.collection("applications").doc();
     await ref.set({
       ...params,
+      interviewQuestions,
       status: "interview_pending",
       createdAt: new Date().toISOString(),
     });
+
     return { success: true, applicationId: ref.id };
   } catch (error) {
     console.error("[createApplication] Error:", error);

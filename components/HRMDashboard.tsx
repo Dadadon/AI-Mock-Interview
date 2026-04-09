@@ -75,7 +75,8 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
 
   const statusLabel = (status: Application["status"]) => {
     switch (status) {
-      case "interview_pending": return "Awaiting Score";
+      case "interview_pending": return "Awaiting Interview";
+      case "interview_incomplete": return "Call Ended Early";
       case "complete": return "Complete";
       case "ineligible": return "Ineligible";
     }
@@ -85,6 +86,7 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
     switch (status) {
       case "complete": return "bg-jamaica-green/20 text-jamaica-green";
       case "interview_pending": return "bg-jamaica-gold/20 text-jamaica-gold";
+      case "interview_incomplete": return "bg-jamaica-gold/10 text-jamaica-gold/70";
       case "ineligible": return "bg-destructive-100/20 text-destructive-100";
       default: return "bg-dark-300 text-light-400";
     }
@@ -188,27 +190,12 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
                     key={app.id}
                     className="border-b border-jamaica-green/10 hover:bg-jamaica-green/5 transition-colors"
                   >
-                    <td className="px-5 py-4 font-semibold">
-                      <div className="flex items-center gap-2">
-                        {app.resumeUrl && (
-                          <a
-                            href={app.resumeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="View resume"
-                            className="text-jamaica-gold hover:text-white transition-colors"
-                          >
-                            <FileText className="w-4 h-4" />
-                          </a>
-                        )}
-                        {app.applicantName}
-                      </div>
-                    </td>
+                    <td className="px-5 py-4 font-semibold">{app.applicantName}</td>
                     <td className="px-5 py-4 text-sm text-light-400 capitalize">{app.jobTitle}</td>
                     <td className="px-5 py-4">
-                      {app.screeningScore != null ? (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${getScoreBg(app.screeningScore)}`}>
-                          {app.screeningScore}
+                      {app.eligibilityScore != null ? (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${getScoreBg(app.eligibilityScore)}`}>
+                          {app.eligibilityScore}
                           <span className="text-xs font-normal opacity-70">/100</span>
                         </span>
                       ) : (
@@ -249,28 +236,33 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
         </div>
       )}
 
-      {/* ── Transcript panel ── */}
+      {/* ── Review modal ── */}
       {selectedApp && (
-        <div className="card-border w-full">
-          <div className="card p-6 space-y-5 rounded-3xl">
-            {/* Panel header */}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedApp(null)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+          {/* Modal */}
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl bg-dark-200 border border-jamaica-green/20 shadow-2xl p-6 space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-bold text-xl">{selectedApp.applicantName}</h3>
                 <p className="text-light-400 text-sm mt-0.5">
-                  {selectedApp.jobTitle} &bull; Screen:{" "}
-                  <span className={`font-bold ${getScoreColor(selectedApp.screeningScore ?? 0)}`}>
-                    {selectedApp.screeningScore ?? "—"}
-                  </span>
-                  {selectedApp.interviewScore != null && (
-                    <>
-                      {" "}· Interview:{" "}
-                      <span className={`font-bold ${getScoreColor(selectedApp.interviewScore)}`}>
-                        {selectedApp.interviewScore}
-                      </span>
-                    </>
+                  {selectedApp.jobTitle} &bull; Interview:{" "}
+                  {selectedApp.interviewScore != null ? (
+                    <span className={`font-bold ${getScoreColor(selectedApp.interviewScore)}`}>
+                      {selectedApp.interviewScore}/100
+                    </span>
+                  ) : (
+                    <span className="text-light-600">—</span>
                   )}
-                  <span className="text-light-600">/100</span>
                 </p>
               </div>
               <button
@@ -284,16 +276,6 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
             {/* Gold divider */}
             <div className="h-px bg-gradient-to-r from-jamaica-gold/50 via-jamaica-green/30 to-transparent" />
 
-            {/* Screening summary */}
-            {selectedApp.screeningSummary && (
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
-                  Screening Summary
-                </h4>
-                <p className="text-sm leading-relaxed text-light-400">{selectedApp.screeningSummary}</p>
-              </div>
-            )}
-
             {/* Interview summary */}
             {selectedApp.interviewSummary && (
               <div>
@@ -301,20 +283,6 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
                   Interview Summary
                 </h4>
                 <p className="text-sm leading-relaxed text-light-400">{selectedApp.interviewSummary}</p>
-              </div>
-            )}
-
-            {/* Screening transcript */}
-            {selectedApp.screeningTranscript && (
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest text-jamaica-gold mb-2">
-                  Screening Transcript
-                </h4>
-                <div className="bg-dark-300/60 border border-jamaica-green/15 rounded-2xl p-4 max-h-48 overflow-y-auto">
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-light-400">
-                    {selectedApp.screeningTranscript}
-                  </p>
-                </div>
               </div>
             )}
 
@@ -330,6 +298,19 @@ const HRMDashboard = ({ employerId, initialApplications }: HRMDashboardProps) =>
                   </p>
                 </div>
               </div>
+            )}
+
+            {/* Resume link */}
+            {selectedApp.resumeUrl && (
+              <a
+                href={selectedApp.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-jamaica-gold hover:text-white transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                View Resume
+              </a>
             )}
           </div>
         </div>

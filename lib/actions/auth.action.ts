@@ -130,3 +130,51 @@ export async function isAuthenticated() {
   const user = await getCurrentUser();
   return !!user;
 }
+
+export async function updateUserResume(params: {
+  userId: string;
+  resumeUrl: string;
+  resumeText: string;
+  resumeFileName: string;
+  resumeSummary?: string;
+  resumeSkills?: string[];
+  resumeExperienceSummary?: string;
+  resumeEducation?: string;
+  resumeYearsExperience?: string;
+}) {
+  try {
+    const {
+      userId, resumeUrl, resumeText, resumeFileName,
+      resumeSummary, resumeSkills, resumeExperienceSummary,
+      resumeEducation, resumeYearsExperience,
+    } = params;
+
+    const update: Record<string, unknown> = { resumeUrl, resumeText, resumeFileName };
+    if (resumeSummary !== undefined) update.resumeSummary = resumeSummary;
+    if (resumeSkills !== undefined) update.resumeSkills = resumeSkills;
+    if (resumeExperienceSummary !== undefined) update.resumeExperienceSummary = resumeExperienceSummary;
+    if (resumeEducation !== undefined) update.resumeEducation = resumeEducation;
+    if (resumeYearsExperience !== undefined) update.resumeYearsExperience = resumeYearsExperience;
+
+    await db.collection("users").doc(userId).update(update);
+    return { success: true };
+  } catch (error) {
+    console.error("[updateUserResume] Error:", error);
+    return { success: false };
+  }
+}
+
+export async function updateUserPhoto(params: {
+  userId: string;
+  photoUrl: string;
+}) {
+  try {
+    await db.collection("users").doc(params.userId).update({
+      photoUrl: params.photoUrl,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("[updateUserPhoto] Error:", error);
+    return { success: false };
+  }
+}
